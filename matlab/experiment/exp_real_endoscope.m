@@ -2,8 +2,8 @@
 load('cameraParamsEndoscope4.mat','cameraParams');
 
 
-filelist = '/home/dam/Documents/PostDoc_Damien/LightModel/data/endoscope_medical_2/list_images_quantitative.txt';
-filename = '/home/dam/Documents/PostDoc_Damien/LightModel/data/endoscope_medical_2/2021-12-15_142911_IMG0019.jpg';
+filelist = '../data/endoscope_medical_2/list_images_quantitative.txt';
+filename = '../data/endoscope_medical_2/2021-12-15_142911_IMG0019.jpg';
 [data,polys_2D,I_undistorted] = get_data_detect_real_endo(filename,cameraParams,5.3,'no_detection');
 
 % Get the groundtruth, the working windows (polys_2D) and the noised image (std-dev = 1)
