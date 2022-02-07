@@ -6,19 +6,13 @@
 %addpath( genpath([ MTWP_PATH '/common/extern/vision/vgg/vgg_multiview' ]) );
 
 % External project
-addpath('/home/dam/Source/GuaranteedEllipseFittingConfidenceRegion');
-addpath('/home/dam/Source/GuaranteedEllipseFittingConfidenceRegion/Conversion Functions');
-addpath('/home/dam/Source/GuaranteedEllipseFittingConfidenceRegion/Covariance');
-addpath('/home/dam/Source/GuaranteedEllipseFittingConfidenceRegion/Direct Ellipse Fit');
-addpath('/home/dam/Source/GuaranteedEllipseFittingConfidenceRegion/Fast Guaranteed AML Ellipse Fit with Uncertainty');
-addpath('/home/dam/Source/GuaranteedEllipseFittingConfidenceRegion/Helper Functions');
-addpath('/home/dam/Source/matlab2tikz-master/src');
-addpath( '~/Documents/THESE_IRIT/CODES/matlab_lib/Bin' );
-addpath( '~/Documents/THESE_IRIT/CODES/matlab_lib/Contrib' );
-addpath( '~/Documents/THESE_IRIT/CODES/matlab_lib/Tools' );
-addpath( '~/Documents/THESE_IRIT/CODES/datoctar/matlab/lib' );
-addpath( '~/Documents/THESE_IRIT/CODES/datoctar/matlab/lib/CircStat' );
-addpath('~/Documents/THESE_IRIT/CODES/datoctar/matlab/image_tools');
+addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion');
+addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Conversion Functions');
+addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Covariance');
+addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Direct Ellipse Fit');
+addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Fast Guaranteed AML Ellipse Fit with Uncertainty');
+addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Helper Functions');
+addpath('/home/mourad/Source/matlab2tikz-master/src');
 addpath('./render');
 addpath('./test');
 addpath('./detection');
