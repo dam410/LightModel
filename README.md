@@ -1,2 +1,2 @@
 # ShadingIsocontour
-3D Vision algorithm to use a geometric primitive based-approach to estimate pose of scene elements from radiance of the image
+3D Vision algorithm to estimate pose of scene elements with geometric primitives based on the study of the radiance in a single image.
