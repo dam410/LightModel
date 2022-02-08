@@ -49,8 +49,7 @@ def create_subplane(ray_00,ray_01,ray_11,ray_10,ray_center,d_cam,N):
 def set_material(obj,k_d,k_s,color = (1.0,1.0,1.0)):
 	mat = bpy.data.materials.new(name="MaterialName");
 	mat.specular_intensity = k_s;
-	mat.diffuse_intensity = k_d;
-	mat.diffuse_color = color;
+	mat.diffuse_color = (color[0]*k_d,color[1]*k_d,color[2]*k_d,0.0);
 	obj.data.materials.append(mat);
 
 # This function takes two interval in radian to generate a random normal vector
