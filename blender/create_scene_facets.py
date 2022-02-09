@@ -49,6 +49,8 @@ def create_subplane(ray_00,ray_01,ray_11,ray_10,ray_center,d_cam,N):
 def set_material(obj,k_d,k_s,color = (1.0,1.0,1.0)):
 	mat = bpy.data.materials.new(name="MaterialName");
 	mat.specular_intensity = k_s;
+	if bpy.app.version[0] < 3:
+		mat.diffuse_intensity = 1.0;
 	mat.diffuse_color = (color[0]*k_d,color[1]*k_d,color[2]*k_d,0.0);
 	obj.data.materials.append(mat);
 
@@ -91,7 +93,11 @@ def create_random_grid(name,nb_l,nb_h,scene,cam,ang_var,d_var):
 	obj.rotation_euler = cam.rotation_euler;
 	# Set the material properties
 	set_material(obj,0.8,0);
-	scene.objects.link(obj);
+	# Attach the object ot the scene
+	if bpy.app.version > (2,80,0):
+		bpy.context.collection.objects.link(obj);
+	else:
+		scene.objects.link(obj);
 	return obj;
 
 #create_random_grid('grid',3,3,scene,cam)
