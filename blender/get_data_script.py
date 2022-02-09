@@ -107,7 +107,11 @@ def get_mesh_dict(mesh):
 		material_dict = {};
 		material_dict['diffuse_color'] = list(mesh.data.materials[i].diffuse_color);
 		material_dict['specular_color'] = list(mesh.data.materials[i].specular_color);
-		material_dict['diffuse_intensity'] = mesh.data.materials[i].diffuse_intensity;
+		if bpy.app.version > (2,80,0):
+			d_col = mesh.data.materials[i].diffuse_intensity;
+			material_dict['diffuse_intensity'] = (d_col[0]+d_col[1]+d_col[2])/3.0;
+		else:
+			material_dict['diffuse_intensity'] = mesh.data.materials[i].diffuse_intensity;
 		material_dict['specular_intensity'] = mesh.data.materials[i].specular_intensity;
 		material_dict['specular_shader'] = mesh.data.materials[i].specular_shader;
 		material_dict['diffuse_shader'] = mesh.data.materials[i].diffuse_shader;
