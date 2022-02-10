@@ -40,8 +40,12 @@ def get_lamp_dict(lamp):
 	lamp_dict = {};
 	lamp_dict['energy'] = lamp.data.energy;
 	lamp_dict['distance'] = lamp.data.distance;
-	lamp_dict['use_specular'] = lamp.data.use_specular;
-	lamp_dict['use_diffuse'] = lamp.data.use_diffuse;
+	if bpy.app.version < (2,80,0):
+		lamp_dict['use_specular'] = lamp.data.use_specular;
+		lamp_dict['use_diffuse'] = lamp.data.use_diffuse;
+	else:
+		lamp_dict['use_specular'] = lamp.data.specular_factor > 0.0;
+		lamp_dict['use_diffuse'] = lamp.data.diffuse_factor > 0.0;
 	# Get its intensity and its type
 	if lamp.data.type == 'POINT':
 		lamp_dict['type'] = 'point';
@@ -132,7 +136,7 @@ def get_obj_dict(obj):
 	# Get its pose and add it to the dict
 	obj_dict['pose'] = get_pose(obj).tolist();
 	# Check the type
-	if obj.type == 'LAMP':
+	if obj.type == 'LAMP' or obj.type == 'LIGHT':
 		obj_dict['type'] = 'lamp';
 		obj_dict['data'] = get_lamp_dict(obj);
 	elif obj.type == 'CAMERA':
