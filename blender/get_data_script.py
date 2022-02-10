@@ -1,7 +1,10 @@
-from mathutils import *; from math import *; from numpy import *
-import json
-import itertools
+from mathutils import *; 
+from math import *; 
+from numpy import * 
+import json 
+import itertools 
 import math
+import bpy
 
 # This function gets the pose of any object and return it as a 4x4 matrix
 def get_pose(obj):
@@ -37,8 +40,12 @@ def get_lamp_dict(lamp):
 	lamp_dict = {};
 	lamp_dict['energy'] = lamp.data.energy;
 	lamp_dict['distance'] = lamp.data.distance;
-	lamp_dict['use_specular'] = lamp.data.use_specular;
-	lamp_dict['use_diffuse'] = lamp.data.use_diffuse;
+	if bpy.app.version < (2,80,0):
+		lamp_dict['use_specular'] = lamp.data.use_specular;
+		lamp_dict['use_diffuse'] = lamp.data.use_diffuse;
+	else:
+		lamp_dict['use_specular'] = lamp.data.specular_factor > 0.0;
+		lamp_dict['use_diffuse'] = lamp.data.diffuse_factor > 0.0;
 	# Get its intensity and its type
 	if lamp.data.type == 'POINT':
 		lamp_dict['type'] = 'point';
@@ -110,12 +117,15 @@ def get_mesh_dict(mesh):
 		if bpy.app.version > (2,80,0):
 			d_col = mesh.data.materials[i].diffuse_color;
 			material_dict['diffuse_intensity'] = (d_col[0]+d_col[1]+d_col[2])/3.0;
+			material_dict['specular_shader'] = 'COOKTORR';
+			material_dict['diffuse_shader'] = 'LAMBERT'
+			material_dict['ambient'] = 0.0
 		else:
 			material_dict['diffuse_intensity'] = mesh.data.materials[i].diffuse_intensity;
+			material_dict['specular_shader'] = mesh.data.materials[i].specular_shader;
+			material_dict['diffuse_shader'] = mesh.data.materials[i].diffuse_shader;
+			material_dict['ambient'] = mesh.data.materials[i].ambient;
 		material_dict['specular_intensity'] = mesh.data.materials[i].specular_intensity;
-		material_dict['specular_shader'] = mesh.data.materials[i].specular_shader;
-		material_dict['diffuse_shader'] = mesh.data.materials[i].diffuse_shader;
-		material_dict['ambient'] = mesh.data.materials[i].ambient;
 		materials.append(material_dict);
 	mesh_dict['materials'] = materials;
 	return mesh_dict;
@@ -126,7 +136,7 @@ def get_obj_dict(obj):
 	# Get its pose and add it to the dict
 	obj_dict['pose'] = get_pose(obj).tolist();
 	# Check the type
-	if obj.type == 'LAMP':
+	if obj.type == 'LAMP' or obj.type == 'LIGHT':
 		obj_dict['type'] = 'lamp';
 		obj_dict['data'] = get_lamp_dict(obj);
 	elif obj.type == 'CAMERA':

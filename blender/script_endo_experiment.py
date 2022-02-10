@@ -27,14 +27,17 @@ def generate_samples(name_gen,output_folder,output_files_list,nb_sample,ang_deg,
 		output_files_list.append(generated_filename+".json");
 		# Remove the mesh
 		bpy.ops.object.select_all(action='DESELECT');
-		bpy.data.objects['temp_mesh'].select = True;
+		if bpy.app.version > (2,80,0):
+			bpy.data.objects['temp_mesh'].select_set(True);
+		else:
+			bpy.data.objects['temp_mesh'].select = True;
 		bpy.ops.object.delete();
 
 # Generate experiment data
 def exp_source_camera_distance():
 	nb_dist = 20;
 	bpy.data.objects.get('Lamp').location;
-	output_folder = '/home/dam/Documents/PostDoc_Damien/LightModel/data/exp_synth_source_camera'
+	output_folder = '/home/mourad/Documents/PostDoc_Damien/Git/LightModel/data/exp_synth_source_camera'
 	exp_name = 'exp_synth_source_cam_dis_';
 	out_list = list();
 	# Distance configuration with discretisation
