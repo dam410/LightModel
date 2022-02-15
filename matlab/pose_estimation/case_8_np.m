@@ -32,6 +32,9 @@ function [dssp,psp,ps] = case_8_np(data,scale)
 			[Xc,N] = plane_orientation_from_circular_contours(data.K,data.T_cam,...
 				data.isocontour.CurveParameters{i_p});
 		end
+		if i_p==1
+			N
+		end
 		Xcs{i_p} = Xc;
 		Ns{i_p} = N;
 		if size(N,2)==2
