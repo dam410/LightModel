@@ -13,17 +13,9 @@ function [L,err] = source_line_from_planes(planes)
 	L = plucker_dm_to_matrix(V(:,3),zeros(3,1));
 	err = S(3,3);
 	G = zeros(size(M));
-<<<<<<< HEAD
-	figure;
-	plot3([G(1,:);M(1,:)],[G(2,:);M(2,:)],[G(3,:);M(3,:)],'-b');
-	hold on;
-	plot3([0,V(1,3)],[0,V(2,3)],[0,V(3,3)],'-r');
-	axis equal;
-=======
 	%figure;
 	%plot3([G(1,:);M(1,:)],[G(2,:);M(2,:)],[G(3,:);M(3,:)],'-b');
 	%hold on;
 	%plot3([0,V(1,1)],[0,V(2,3)],[0,V(3,3)],'-r');
 	%axis equal;
->>>>>>> 4dfbe1cbe78c5120fa387700b88e9b33214842ae
 end
