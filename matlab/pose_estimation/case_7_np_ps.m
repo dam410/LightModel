@@ -26,6 +26,8 @@ function [dssp,psp,ps] = case_7_np_ps(data)
                                 Xc = [Xc,Xc_ambig];
                                 N = [N,N_ambig];
                         end
+			N = -N;
+
                 else
                         [Xc,N] = plane_orientation_from_circular_contours(data.K,data.T_cam,...
                                 data.isocontour.CurveParameters{i_p});

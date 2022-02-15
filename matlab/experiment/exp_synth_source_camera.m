@@ -19,13 +19,13 @@ for i_dis = 1:20
 			% Estimating the pose with global model
 			[dssp_global,psp_global,ps_global] = case_8_np(data_td,norm(data.groundtruth.SourcePosition));
 			% Estimating the pose with colocalised model
-			[dssp_colocalised,psp_colocalised,ps_colocalised] = case_8_np(data_td_circular,norm(data.groundtruth.SourcePosition));
+			[dssp_colocalised,psp_colocalised,ps_colocalised] = case_7_co_ps(data_td_circular);
 			% Measure the error and store it to be displayed
 			[err_h_global,err_orient_global,err_d_global,err_s_global] = ...
 				eval_pose_n(dssp_global,psp_global,ps_global,data_td);
 			[err_h_colocalised,err_orient_colocalised,err_d_colocalised,err_s_colocalised] = ...
 				eval_pose_n(dssp_colocalised,psp_colocalised,ps_colocalised,data_td_circular);
-			end
+		end
 	end
 end
 
