@@ -37,11 +37,11 @@ function [dssp,psp,ps] = case_8_np(data,scale)
 		if size(N,2)==2
 			P_s_1 = source_plane_from_circle_center_orientation(data.K,Xc(:,1),N(:,1));
 			P_s_2 = source_plane_from_circle_center_orientation(data.K,Xc(:,2),N(:,2));
-			disp('N Xc Ps angle');
-			N(:,1)
-			Xc(:,1)
-			P_s_1(:,1)
-			180*acos([1,0,0]*P_s_1(1:3,1))/pi
+			%disp('N Xc Ps angle');
+			%N(:,1)
+			%Xc(:,1)
+			%P_s_1(:,1)
+			%180*acos([1,0,0]*P_s_1(1:3,1))/pi
 			dssp{i_p} = {Inf};
 			psp{i_p} = {[N(:,1);0],[N(:,2);0]};
 			all_planes{1,i_p} = P_s_1;
@@ -76,10 +76,14 @@ function [dssp,psp,ps] = case_8_np(data,scale)
 		%	display_normals(all_planes);
 		%else
 			%display_normals(all_planes);
-			all_poss = 0;
-			err_poss = 0;
+		all_poss = 0;
+		err_poss = 0;
+		if n_p>3
+			[L,err] = source_line_from_planes_robust(all_planes(1,:));
+		else
 			[L,err] = source_line_from_planes(all_planes(1,:));
-			L_poss = {L};
+		end
+		L_poss = {L};
 		%end
 		% Does not solve the ambiguity with intersection of the lines
 		%	
@@ -89,7 +93,6 @@ function [dssp,psp,ps] = case_8_np(data,scale)
 		%all_planes{1,2}
 		%all_planes{2,2}
 		%all_planes{1,4}
-		[L,err] = source_line_from_planes(all_planes(1,:));
 		%% If we have more than 1 isocontour we have no ambiguities
 		%% 	the intersection of lines can be calculated
 		%if length(data.isocontour.CurveParameters{i_p})>1
