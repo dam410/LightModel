@@ -34,7 +34,9 @@ for i_dis = 1:20
 		err_s_global_all(i_dis,i_samp) = err_s_global;
 		err_orient_global_all(i_dis,(i_samp-1)*6+(1:6)) = err_orient_global;
 		err_orient_colocalised_all(i_dis,(i_samp-1)*6+(1:6)) = err_orient_colocalised;
+		% Display something to check that it goes well
+		disp(['Finish run for i_dis = ',num2str(i_dis),' i_samp = ',num2str(i_samp)]);
 	end
 end
-
 fclose(str_file);
+save('results_exp_synth_source_camera.mat');
