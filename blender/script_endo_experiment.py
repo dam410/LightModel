@@ -19,7 +19,7 @@ def generate_samples(name_gen,output_folder,output_files_list,nb_sample,ang_deg,
 	# For N images
 	for i_sample in  range(0,nb_sample):
 		# Generate the mesh
-		create_scene_facets.create_random_grid('temp_mesh',3,3,scene,cam,ang_var,dis_avg);
+		create_scene_facets.create_random_grid('temp_mesh',2,3,scene,cam,ang_var,dis_avg);
 		# Capture image
 		i_str = "_"+"{:0>2d}".format(int(i_sample));
 		generated_filename = name_gen + i_str;
