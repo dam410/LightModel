@@ -8,14 +8,14 @@ function [L_mat,err] = source_line_from_planes_robust(planes)
         [L_mat] = plucker_dm_to_matrix(transpose(L),zeros(3,1));
         err = sum(err_L1(L,transpose(M)));
         G = zeros(size(M));
-        figure;
-        plot3([G(1,:);M(1,:)],[G(2,:);M(2,:)],[G(3,:);M(3,:)],'-r');
-	hold on;
-        plot3([G(1,inliersIdx);M(1,inliersIdx)],...
-		[G(2,inliersIdx);M(2,inliersIdx)],...
-		[G(3,inliersIdx);M(3,inliersIdx)],'-b');
-	plot3([0,L(1)],[0,L(2)],[0,L(3)],'-g');
-        axis equal;
+        %figure;
+        %plot3([G(1,:);M(1,:)],[G(2,:);M(2,:)],[G(3,:);M(3,:)],'-r');
+	%hold on;
+        %plot3([G(1,inliersIdx);M(1,inliersIdx)],...
+	%	[G(2,inliersIdx);M(2,inliersIdx)],...
+	%	[G(3,inliersIdx);M(3,inliersIdx)],'-b');
+	%plot3([0,L(1)],[0,L(2)],[0,L(3)],'-g');
+        %axis equal;
 end
 
 function [L] = fitting_source_line(D)

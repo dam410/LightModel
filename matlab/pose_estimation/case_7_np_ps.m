@@ -14,6 +14,7 @@ function [dssp,psp,ps] = case_7_np_ps(data)
 	dssp = cell(1,n_p);
 	psp = cell(1,n_p);
 	for i_p = 1:n_p
+		pt_vis = get_visible_point_from_data(data,i_p);
 		% Check if we have only one family of curves otherwise
                 %       calculate Xc and N separately for both solutions in the same format
                 %       and store the results
@@ -22,7 +23,7 @@ function [dssp,psp,ps] = case_7_np_ps(data)
                         N = [];
                         for i_ambig = 1:length(data.isocontour.CurveParameters{i_p})
                                 [Xc_ambig,N_ambig] = plane_orientation_from_circular_contours(data.K,data.T_cam,...
-                                        data.isocontour.CurveParameters{i_p}{i_ambig});
+                                        data.isocontour.CurveParameters{i_p}{i_ambig},pt_vis);
                                 Xc = [Xc,Xc_ambig];
                                 N = [N,N_ambig];
                         end
@@ -30,7 +31,7 @@ function [dssp,psp,ps] = case_7_np_ps(data)
 
                 else
                         [Xc,N] = plane_orientation_from_circular_contours(data.K,data.T_cam,...
-                                data.isocontour.CurveParameters{i_p});
+                                data.isocontour.CurveParameters{i_p},pt_vis);
                 end
 		if size(N,2)==2
 			% NO IT IS NOT WORKING, THE AMBIGUOUS POSE OF THE PLANE GIVE THE SAME PLANE !!!!!!!!!!!!!

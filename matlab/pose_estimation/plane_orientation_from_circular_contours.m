@@ -1,11 +1,15 @@
 % Function to estimate the orientation of the scene plane using one or two circular isocontours
 %	We distinguih K (only focal, ratio and sensor size) with K_im (take into account also the resolution in pixel
 %		and the axial inversion)
-function [Xc_best,N_best] = plane_orientation_from_circular_contours(K_im,T_cam,circular_isocontours);
+function [Xc_best,N_best] = plane_orientation_from_circular_contours(K_im,T_cam,circular_isocontours,pt_vis);
 	% Calculate orientation of the plane from circular isocontours
 	nb_iso = length(circular_isocontours);
 	Xc = zeros(2*nb_iso,2);
 	N = zeros(3*nb_iso,2);
+	% Check if a visible point is provided for convention on normal orientation
+	if nargin < 4 
+		pt_vis = [];
+	end
 	for i=1:nb_iso
 		ell = transpose_ellipse(circular_isocontours{i});
                 E = param2ellipse(ell);
@@ -13,6 +17,7 @@ function [Xc_best,N_best] = plane_orientation_from_circular_contours(K_im,T_cam,
                 Q = K_im'*E*K_im;
 		%[Xc1,Xc2,~,~,N_i] = image_center(K_im,ell);
 		N_i = vanishing_line_paper_co(Q);
+		% Now calculate the image of the brightest point
 		if size(N_i,2)>1
 			Xc1 = K_im*inv(Q)*N_i(:,1);
 			Xc2 = K_im*inv(Q)*N_i(:,2);
@@ -48,4 +53,6 @@ function [Xc_best,N_best] = plane_orientation_from_circular_contours(K_im,T_cam,
 		Xc_best = Xc;
 		N_best = N;
 	end
+	% Apply the convention for the normals
+	N_best = convention_normals(N_best,Xc_best,K_im,pt_vis);
 end

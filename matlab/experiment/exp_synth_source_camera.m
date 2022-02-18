@@ -25,6 +25,10 @@ for i_dis = 1:20
 				eval_pose_n(dssp_global,psp_global,ps_global,data_td);
 			[err_h_colocalised,err_orient_colocalised,err_d_colocalised,err_s_colocalised] = ...
 				eval_pose_n(dssp_colocalised,psp_colocalised,ps_colocalised,data_td_circular);
+			% Visualize results for debugging only
+			visualize_results_2(data_td,dssp_global,psp_global,ps_global);
+			visualize_results_2(data_td_circular,dssp_colocalised,psp_colocalised,ps_colocalised);
+			
 		end
 	end
 end

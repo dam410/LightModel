@@ -15,8 +15,9 @@ function [dssp,psp,ps] = case_8_np_scaled(data)
 	all_im_center = cell(2,n_p);
 	flag_ambig = 0;
 	for i_p = 1:n_p
+		pt_vis = get_visible_point_from_data(data,i_p);
 		[Xc,N] = plane_orientation_from_circular_contours(data.K,data.T_cam,...
-			data.isocontour.CurveParameters{i_p});
+			data.isocontour.CurveParameters{i_p},pt_vis);
 		if size(N,2)==2
 			P_s_1 = source_plane_from_circle_center_orientation(data.K,Xc(:,1),N(:,1));
 			P_s_2 = source_plane_from_circle_center_orientation(data.K,Xc(:,2),N(:,2));

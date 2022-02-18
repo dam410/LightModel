@@ -15,12 +15,13 @@ function [dssp,psp,ps] = case_7_co_ps(data)
 	dssp = cell(1,n_p);
 	psp = cell(1,n_p);
 	for i_p = 1:n_p
+		pt_vis = get_visible_point_from_data(data,i_p);
 		if iscell(data.isocontour.CurveParameters{i_p}{1})
 			curves = data.isocontour.CurveParameters{i_p}{1};
 		else
 			curves = data.isocontour.CurveParameters{i_p};
 		end
-		[Xc,N] = plane_orientation_from_circular_contours_co(data.K,data.T_cam,curves);
+		[Xc,N] = plane_orientation_from_circular_contours_co(data.K,data.T_cam,curves,pt_vis);
 		%[Xc,N] = plane_orientation_from_circular_contours(data.K,data.T_cam,curves)
 		% Distance to plane cannot be estimated, we set it to 1.0 and calculate h accordingly.
 		psp{i_p} = {[N;0.0]};

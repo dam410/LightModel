@@ -1,6 +1,5 @@
 function [N1,N2] = vanishing_line_paper(Q)
 
-
 	Q = Q*sign(det(Q))/(abs(det(Q))^(1/3));
 
 	trq = trace(Q);
@@ -9,7 +8,6 @@ function [N1,N2] = vanishing_line_paper(Q)
 	a = (1/2)*(2*trq^3-9*trq*triq+27)/((trq^2-3*triq).^(3/2));
 	%a = (1/2)*(trq^3-9*trq*triq*+27)/((trq^2-3*triq).^(3/2))
 	alpha = 1/3*acos(a);
-
 
 	l12 = sqrt(trq^2-3*triq)*(cos(alpha)-sqrt(3)/3*sin(alpha));
 	l23 = sqrt(trq^2-3*triq)*2*sqrt(3)/3*sin(alpha);
