@@ -100,3 +100,6 @@ for i=1:length(list_img)
 	%disp('Error with colocalised model and td detection adapted');
 	err_orient_co_td_co_array = [err_orient_co_td_co_array,err_orient_co_td_co];
 end
+
+
+save('results_exp_real_endoscope.mat');
