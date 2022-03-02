@@ -13,7 +13,7 @@ addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Direct Ell
 addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Fast Guaranteed AML Ellipse Fit with Uncertainty');
 addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Helper Functions');
 addpath('/home/mourad/Source/matlab2tikz-master/src');
-addpath('./render');
+addpath('./MatlabRender');
 addpath('./test');
 addpath('./detection');
 addpath('./dense_detection');
