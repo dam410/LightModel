@@ -347,11 +347,11 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 			[v_init_persp,scale] = vector_init_to_perspectivity_minimal_param(h_vect_init_not_normalized,inv(K));
 			x_init = [v_init_persp;a_vect_init./(scale.^2)];
 			% Method without changing intensity in control point
-			%[H_opt_normalized,r_opt] = optimize_perspectivity(I,pt_in_poly,I_pt,I_vect,...
-			%	inv(K),x_init,H_normalized,NB_R,R_vect);
-			% Changing intensity in control point
-			[H_opt_normalized,r_opt,I_vect_opt] = optimize_perspectivity_full_cp(I,pt_in_poly,I_pt,I_vect,...
+			[H_opt_normalized,r_opt] = optimize_perspectivity(I,pt_in_poly,I_pt,I_vect,...
 				inv(K),x_init,H_normalized,NB_R,R_vect);
+			% Changing intensity in control point
+			%[H_opt_normalized,r_opt,I_vect_opt] = optimize_perspectivity_full_cp(I,pt_in_poly,I_pt,I_vect,...
+			%	inv(K),x_init,H_normalized,NB_R,R_vect);
 		case 'rotation'
 			% Model based on simple rotation of the main axis H = R
 			% Note : There is no normalization in this case H_normalized = eye(3)
