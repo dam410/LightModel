@@ -6,13 +6,13 @@
 %addpath( genpath([ MTWP_PATH '/common/extern/vision/vgg/vgg_multiview' ]) );
 
 % External project
-addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion');
-addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Conversion Functions');
-addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Covariance');
-addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Direct Ellipse Fit');
-addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Fast Guaranteed AML Ellipse Fit with Uncertainty');
-addpath('/home/mourad/Source/GuaranteedEllipseFittingConfidenceRegion/Helper Functions');
-addpath('/home/mourad/Source/matlab2tikz-master/src');
+addpath('~/Source/GuaranteedEllipseFittingConfidenceRegion');
+addpath('~/Source/GuaranteedEllipseFittingConfidenceRegion/Conversion Functions');
+addpath('~/Source/GuaranteedEllipseFittingConfidenceRegion/Covariance');
+addpath('~/Source/GuaranteedEllipseFittingConfidenceRegion/Direct Ellipse Fit');
+addpath('~/Source/GuaranteedEllipseFittingConfidenceRegion/Fast Guaranteed AML Ellipse Fit with Uncertainty');
+addpath('~/Source/GuaranteedEllipseFittingConfidenceRegion/Helper Functions');
+addpath('~/Source/matlab2tikz-master/src');
 addpath('./MatlabRender');
 addpath('./test');
 addpath('./detection');
