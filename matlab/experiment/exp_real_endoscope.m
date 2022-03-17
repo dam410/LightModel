@@ -37,33 +37,41 @@ for i=1:length(list_img)
 	data_co_td = isocontour_detection(data,I_gray,polys_2D,'Mode','top-down-circular','N_circ',3,'Display','off');
 	disp('Detection with top-down approach dedicated to colocalized model done');
 
-	%figure('Name','Display the detection with top-down approach');
-	%subplot(2,1,1);
-	%imshow(I_rgb);
-	%hold on;
-	%for i_p = 1:length(data_td.isocontour.CurveParameters)
-	%	for i_iso = 1:length(data_td.isocontour.CurveParameters{i_p}{1})
-	%		pts = data_td.isocontour.Points{i_p}{1}{i_iso};
-	%		plot(pts(:,2),pts(:,1),'+r');
-	%		E = param2ellipse(data_td.isocontour.CurveParameters{i_p}{1}{i_iso});
-	%		E_t = [0,1,0;1,0,0;0,0,1]*E*[0,1,0;1,0,0;0,0,1];
-	%		displayEllipse(E_t);
-	%	end
-	%end
-	%title('Top-down detection with perspectivity parametrisation');
-	%subplot(2,1,2);
-	%imshow(I_rgb);
-	%hold on;
-	%for i_p = 1:length(data_co_td.isocontour.CurveParameters)
-	%	for i_iso = 1:length(data_co_td.isocontour.CurveParameters{i_p}{1})
-	%		pts = data_co_td.isocontour.Points{i_p}{1}{i_iso};
-	%		plot(pts(:,2),pts(:,1),'+r');
-	%		E = param2ellipse(data_co_td.isocontour.CurveParameters{i_p}{1}{i_iso});
-	%		E_t = [0,1,0;1,0,0;0,0,1]*E*[0,1,0;1,0,0;0,0,1];
-	%		displayEllipse(E_t);
-	%	end
-	%end
-	%title('Top-down detection with only rotation parametrisation');
+	[homographies,isocontours] = get_groundtruth_isocontours(data_td,polys_2D);
+
+	figure('Name','Display the detection with top-down approach');
+	subplot(2,1,1);
+	imshow(I_rgb);
+	hold on;
+	for i_p = 1:length(data_td.isocontour.CurveParameters)
+		for i_iso = 1:length(data_td.isocontour.CurveParameters{i_p}{1})
+			pts = data_td.isocontour.Points{i_p}{1}{i_iso};
+			plot(pts(:,2),pts(:,1),'+r');
+			E = param2ellipse(data_td.isocontour.CurveParameters{i_p}{1}{i_iso});
+			E_t = [0,1,0;1,0,0;0,0,1]*E*[0,1,0;1,0,0;0,0,1];
+			displayEllipse(E_t);
+			E_gt = param2ellipse(isocontours.CurveParameters{i_p}{i_iso});
+			E_gt_t = [0,1,0;1,0,0;0,0,1]*E_gt*[0,1,0;1,0,0;0,0,1];
+			displayEllipse(E_gt_t,'b');
+		end
+	end
+	title('Top-down detection with perspectivity parametrisation');
+	subplot(2,1,2);
+	imshow(I_rgb);
+	hold on;
+	for i_p = 1:length(data_co_td.isocontour.CurveParameters)
+		for i_iso = 1:length(data_co_td.isocontour.CurveParameters{i_p}{1})
+			pts = data_co_td.isocontour.Points{i_p}{1}{i_iso};
+			plot(pts(:,2),pts(:,1),'+r');
+			E = param2ellipse(data_co_td.isocontour.CurveParameters{i_p}{1}{i_iso});
+			E_t = [0,1,0;1,0,0;0,0,1]*E*[0,1,0;1,0,0;0,0,1];
+			displayEllipse(E_t);
+			E_gt = param2ellipse(isocontours.CurveParameters{i_p}{i_iso});
+			E_gt_t = [0,1,0;1,0,0;0,0,1]*E_gt*[0,1,0;1,0,0;0,0,1];
+			displayEllipse(E_gt_t,'b');
+		end
+	end
+	title('Top-down detection with only rotation parametrisation');
 
 
 	% Calculate the first estimation based on close form solution
@@ -102,4 +110,4 @@ for i=1:length(list_img)
 end
 
 
-save('results_exp_real_endoscope.mat');
+%save('results_exp_real_endoscope.mat');
