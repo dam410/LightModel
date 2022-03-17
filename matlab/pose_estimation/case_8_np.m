@@ -81,7 +81,8 @@ function [dssp,psp,ps] = case_8_np(data,scale)
 			% Check whether the point is in front or behidn the camera
 			if isfield(data,'groundtruth')
 				if norm(ps{1}+data.groundtruth.SourcePosition) < norm(ps{1}-data.groundtruth.SourcePosition)
-				ps{1} = -ps{1};
+					ps{1} = -ps{1};
+				end
 			end
 			% A solution is possible if any point X on the plane follows dot(N,S-X)>0
 			for i_p = 1:n_p
