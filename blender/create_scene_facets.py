@@ -1,6 +1,7 @@
 import importlib
 import sys
 import numpy as np
+import numpy.linalg
 import math
 import bpy
 sys.path.append('/home/dam/Documents/PostDoc_Damien/LightModel/blender/')
@@ -63,12 +64,42 @@ def random_normal(a_inter,b_inter):
 	print([math.sin(a)*math.cos(b),math.sin(a)*math.sin(b),math.cos(a)]);
 	return [math.sin(a)*math.cos(b),math.sin(a)*math.sin(b),math.cos(a)];
 
+def random_normal_centered(a_inter,b_inter,pt_center,source_loc):
+	a = np.random.rand()*(a_inter[1]-a_inter[0])+a_inter[0];
+	b = np.random.rand()*(b_inter[1]-b_inter[0])+b_inter[0];
+	dir_S = source_loc-pt_center;
+	N = dir_S*(1.0/numpy.linalg.norm(dir_S,2));
+	M = rot_mat_from_ab(ab_from_normal(N));
+	T = M*rot_mat_from_ab([a,b]);
+	return [T[0,2],T[1,2],T[2,2]];
+
+def normal_from_ab(ab):
+	a = ab[0];
+	b = ab[1];
+	return [math.sin(a)*math.cos(b),math.sin(a)*math.sin(b),math.cos(a)];
+
+def ab_from_normal(N):
+	b = math.asin(N[3]);
+	a = 0;
+	if math.abs(math.cos(b))>1e-10:
+		a = math.atan2(N[2]/math.cos(b),N[1]/math.cos(b));
+	return [a,b];
+
+def rot_mat_from_ab(ab):
+	a = ab[0];
+	b = ab[1];
+	ca = math.cos(a);
+	sa = math.sin(a);
+	cb = math.cos(b);
+	sb = math.sin(b);
+	return np.matrix([[ca*cb,-sa,ca*sb],[sa*cb,ca,sa*sb],[-sb,0,cb]]);
+
 def random_distance(d_inter):
 	return np.random.rand()*(d_inter[1]-d_inter[0])+d_inter[0];
 
 # Create a meshgrid which subdivise the image and calculate the rays at the intersection
 # then create small planes with the rays given a distance to the camera and a normal
-def create_random_grid(name,nb_l,nb_h,scene,cam,ang_var,d_var):
+def create_random_grid(name,nb_l,nb_h,scene,cam,ang_var,d_var,centered = False):
 	h = scene.render.resolution_y;	
 	l = scene.render.resolution_x;
 	K = get_camera_matrices(cam,scene);
@@ -83,7 +114,14 @@ def create_random_grid(name,nb_l,nb_h,scene,cam,ang_var,d_var):
 			pt_11 = (np.matrix([(n_l+1.0)/nb_l*l,(n_h+1.0)/nb_h*h,1.0])*(np.linalg.inv(K)).transpose()).tolist()[0];
 			pt_10 = (np.matrix([(n_l+1.0)/nb_l*l,n_h/nb_h*h,1])*(np.linalg.inv(K)).transpose()).tolist()[0];
 			pt_center = (np.matrix([(n_l+0.5)/nb_l*l,(n_h+0.5)/nb_h*h,1])*(np.linalg.inv(K)).transpose()).tolist()[0];
-			vertices = create_subplane(pt_00,pt_10,pt_11,pt_01,pt_center,-random_distance([1.2-d_var/2.0,1.2+d_var/2.0]),random_normal([-ang_var,ang_var],[-math.pi/2,math.pi/2]));
+			rnd_d = random_distance([1.2-d_var/2.0,1.2+d_var/2.0]);
+			if centered:
+				lamp_loc = scene.objects['Lamp'].location;
+				pt_c_n =  rnd_d*np.array(pt_center)/math.sqrt(np.dot(pt_center,pt_center));
+				rnd_N = random_normal_centered([-ang_var,ang_var],[-math.pi/2,math.pi/2],pt_c_n,lamp_loc);
+			else:
+				rnd_N = random_normal([-ang_var,ang_var],[-math.pi/2,math.pi/2]);
+			vertices = create_subplane(pt_00,pt_10,pt_11,pt_01,pt_center,-rnd_d,rnd_N);
 			all_vert.extend(vertices);
 			all_faces.append(tuple([x for x in range(count,count+4)]))
 			count = count + 4;
