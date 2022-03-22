@@ -4,6 +4,7 @@ import numpy as np
 import numpy.linalg
 import math
 import bpy
+import mathutils
 sys.path.append('/home/dam/Documents/PostDoc_Damien/LightModel/blender/')
 #import get_data_script
 
@@ -52,7 +53,7 @@ def set_material(obj,k_d,k_s,color = (1.0,1.0,1.0)):
 	mat.specular_intensity = k_s;
 	if bpy.app.version < (2,80,0):
 		mat.diffuse_intensity = 1.0;
-		mat.diffuse_color = (color[0],color[1],color[2],0.0);
+		mat.diffuse_color = (color[0],color[1],color[2]);
 	else:
 		mat.diffuse_color = (color[0]*k_d,color[1]*k_d,color[2]*k_d,0.0);
 	obj.data.materials.append(mat);
@@ -65,9 +66,10 @@ def random_normal(a_inter,b_inter):
 	return [math.sin(a)*math.cos(b),math.sin(a)*math.sin(b),math.cos(a)];
 
 def random_normal_centered(a_inter,b_inter,pt_center,source_loc):
+	pt_center_vec = mathutils.Vector([pt_center[0],pt_center[1],pt_center[2]]);
 	a = np.random.rand()*(a_inter[1]-a_inter[0])+a_inter[0];
 	b = np.random.rand()*(b_inter[1]-b_inter[0])+b_inter[0];
-	dir_S = source_loc-pt_center;
+	dir_S = source_loc-pt_center_vec;
 	N = dir_S*(1.0/numpy.linalg.norm(dir_S,2));
 	M = rot_mat_from_ab(ab_from_normal(N));
 	T = M*rot_mat_from_ab([a,b]);
@@ -79,10 +81,10 @@ def normal_from_ab(ab):
 	return [math.sin(a)*math.cos(b),math.sin(a)*math.sin(b),math.cos(a)];
 
 def ab_from_normal(N):
-	b = math.asin(N[3]);
-	a = 0;
-	if math.abs(math.cos(b))>1e-10:
-		a = math.atan2(N[2]/math.cos(b),N[1]/math.cos(b));
+	a = math.acos(N[2]);
+	b = 0;
+	if np.absolute(math.sin(a))>1e-10:
+		b = math.atan2(N[1]/math.sin(a),N[0]/math.sin(a));
 	return [a,b];
 
 def rot_mat_from_ab(ab):
@@ -92,7 +94,8 @@ def rot_mat_from_ab(ab):
 	sa = math.sin(a);
 	cb = math.cos(b);
 	sb = math.sin(b);
-	return np.matrix([[ca*cb,-sa,ca*sb],[sa*cb,ca,sa*sb],[-sb,0,cb]]);
+	print(ca)
+	return np.matrix([[ca*cb,-sb,cb*sa],[sb*ca,cb,sb*sa],[-sa,0,ca]]);
 
 def random_distance(d_inter):
 	return np.random.rand()*(d_inter[1]-d_inter[0])+d_inter[0];

@@ -76,7 +76,7 @@ def exp_source_camera_distance():
 def exp_source_camera_one_scene():
 	nb_dist = 20;
 	dis_avg = 1.0;
-	ang_var = math.pi*45/180.0;
+	ang_var = math.pi*20/180.0;
 	bpy.data.objects.get('Lamp').location;
 	output_folder = '/home/mourad/Documents/PostDoc_Damien/Git/LightModel/data/exp_synth_source_camera'
 	exp_name = 'exp_synth_source_cam_one_scene_dis_';
@@ -85,7 +85,7 @@ def exp_source_camera_one_scene():
 	cam = bpy.data.objects[0];
 	# Degree to radian conversion
 	# Generate one scene
-	create_scene_facets.create_random_grid('temp_mesh',2,3,scene,cam,ang_var,dis_avg);
+	create_scene_facets.create_random_grid('temp_mesh',2,3,scene,cam,ang_var,dis_avg,True);
 	# Capture image
 	for i_d in range(0,nb_dist):
 		bpy.data.objects.get('Lamp').location = Vector([i_d*0.5/nb_dist,0.0,0.0]);
