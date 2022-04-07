@@ -69,10 +69,11 @@ def random_normal_centered(a_inter,b_inter,pt_center,source_loc):
 	pt_center_vec = mathutils.Vector([pt_center[0],pt_center[1],pt_center[2]]);
 	a = np.random.rand()*(a_inter[1]-a_inter[0])+a_inter[0];
 	b = np.random.rand()*(b_inter[1]-b_inter[0])+b_inter[0];
-	dir_S = source_loc-pt_center_vec;
+	dir_S = source_loc+pt_center_vec;
 	N = dir_S*(1.0/numpy.linalg.norm(dir_S,2));
 	M = rot_mat_from_ab(ab_from_normal(N));
 	T = M*rot_mat_from_ab([a,b]);
+	print(pt_center_vec)
 	return [T[0,2],T[1,2],T[2,2]];
 
 def normal_from_ab(ab):

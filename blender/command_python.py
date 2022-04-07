@@ -136,3 +136,14 @@ importlib.reload(script_endo_experiment);
 importlib.reload(create_scene_facets);
 create_scene_facets.create_random_grid('test',2,2,bpy.data.scenes[0],bpy.data.objects[0],0.26,1.0);
 
+import importlib
+import sys
+sys.path.append('/home/mourad/Documents/PostDoc_Damien/Git/LightModel/blender/');
+import script_endo_experiment
+import create_scene_facets
+import get_data_script
+importlib.reload(script_endo_experiment);
+importlib.reload(get_data_script);
+importlib.reload(create_scene_facets);
+script_endo_experiment.exp_source_camera_one_scene();
+

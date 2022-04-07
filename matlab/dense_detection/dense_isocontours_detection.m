@@ -731,12 +731,12 @@ function [H_opt_normalized,r_opt] = optimize_perspectivity(I,pt_in_poly,I_pt,I_v
 		invK,x_init,H_normalized,NB_R,R_vect,lb_angle,ub_angle)
 
 	options_perspective = optimoptions('lsqnonlin');
-	options_perspective.Algorithm = 'trust-region-reflective';
-	options_perspective.Display = 'off';
+	options_perspective.Algorithm = 'levenberg-marquardt';
+	options_perspective.Display = 'iter-detailed';
 	options_perspective.StepTolerance = 1e-12;
 	options_perspective.FunctionTolerance = 1e-10;
 	options_perspective.MaxIter = 250;
-	options_perspective.SpecifyObjectiveGradient = false;
+	options_perspective.SpecifyObjectiveGradient = true;
 	options_perspective.CheckGradients = false;
 	options_perspective.MaxFunctionEvaluations = 20000;
 	if nargin<12
@@ -746,7 +746,7 @@ function [H_opt_normalized,r_opt] = optimize_perspectivity(I,pt_in_poly,I_pt,I_v
 	%lb = [lb_angle;-Inf*ones(3,1);zeros(NB_R-1,1)];
 	lb = [lb_angle;-Inf*ones(3,1);zeros(NB_R-1,1)];
 	ub = [ub_angle;Inf*ones(2+NB_R,1)];
-	fun_opt = @(param) evaluate_error_homography_monotone(I,pt_in_poly,I_pt,I_vect,...
+	fun_opt = @(param) evaluate_error_homography_monotone_proxy_only_x_spline(I,pt_in_poly,I_pt,I_vect,...
 	vector_to_perspectivity_minimal_param(param(1:4),invK),param(5:(4+NB_R)));
 	% Calculate the initial point for the optimization
 
@@ -766,7 +766,7 @@ function [H_opt_normalized,r_opt] = optimize_perspectivity(I,pt_in_poly,I_pt,I_v
 	tic;
 	% When working with the constraints the value of the residual in optimization debug log
 	%	is higher, this should not be a problem though
-	[x_opt,~,~,~,output] = lsqnonlin(fun_opt,x_init,lb,ub,options_perspective);
+	[x_opt,~,~,~,output] = lsqnonlin(fun_opt,x_init,[],[],options_perspective);
 	%x_opt = x_init;
 	toc
 	% Calculate the projected intensity we would want
@@ -808,5 +808,4 @@ function [H_opt_normalized,r_opt,I_vect_opt] = optimize_perspectivity_full_cp(I,
 	r_opt = R_vect*x_opt(5:(4+NB_R));
 	I_vect_opt = transpose(x_opt((5+NB_R):4+2*NB_R));
 end
-
 

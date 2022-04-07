@@ -18,6 +18,8 @@ def generate_samples(name_gen,output_folder,output_files_list,nb_sample,ang_deg,
 	ang_var = math.pi*ang_deg/180.0;
 	# For N images
 	for i_sample in  range(0,nb_sample):
+		# Remove the mesh
+		delete_temp_mesh();
 		# Generate the mesh
 		create_scene_facets.create_random_grid('temp_mesh',2,3,scene,cam,ang_var,dis_avg);
 		# Capture image
@@ -25,13 +27,6 @@ def generate_samples(name_gen,output_folder,output_files_list,nb_sample,ang_deg,
 		generated_filename = name_gen + i_str;
 		get_data_script.gen_file_scene(bpy,generated_filename+'.json',generated_filename+'.png',output_folder);
 		output_files_list.append(generated_filename+".json");
-		# Remove the mesh
-		bpy.ops.object.select_all(action='DESELECT');
-		if bpy.app.version > (2,80,0):
-			bpy.data.objects['temp_mesh'].select_set(True);
-		else:
-			bpy.data.objects['temp_mesh'].select = True;
-		bpy.ops.object.delete();
 
 
 def gen_sample(scene,cam,ang_var,name_gen,output_folder,output_files_list,dis_avg):
@@ -66,16 +61,27 @@ def exp_source_camera_distance():
 	for i_d in range(0,nb_dist):
 		bpy.data.objects.get('Lamp').location = Vector([i_d*0.5/nb_dist,0.0,0.0]);
 		name_gen = exp_name + str(i_d)
-		generate_samples(name_gen,output_folder,out_list,10,25,1.0);
+		generate_samples(name_gen,output_folder,out_list,10,20,0.5);
 	# Write a file with all the name
 	f = open(output_folder+"/filenames_source_cam.txt", "a");
 	for filename in out_list:
 		f.write(filename + "\n");
 	f.close();
 
+def delete_temp_mesh():
+	if ('temp_mesh' in bpy.data.objects):
+		bpy.ops.object.select_all(action='DESELECT');
+		if bpy.app.version > (2,80,0):
+			bpy.data.objects['temp_mesh'].select_set(True);
+		else:
+			bpy.data.objects['temp_mesh'].select = True;
+		bpy.ops.object.delete();
+
+
+
 def exp_source_camera_one_scene():
 	nb_dist = 20;
-	dis_avg = 1.0;
+	dis_avg = 0.5;
 	ang_var = math.pi*20/180.0;
 	bpy.data.objects.get('Lamp').location;
 	output_folder = '/home/mourad/Documents/PostDoc_Damien/Git/LightModel/data/exp_synth_source_camera'
@@ -85,10 +91,11 @@ def exp_source_camera_one_scene():
 	cam = bpy.data.objects[0];
 	# Degree to radian conversion
 	# Generate one scene
-	create_scene_facets.create_random_grid('temp_mesh',2,3,scene,cam,ang_var,dis_avg,True);
 	# Capture image
 	for i_d in range(0,nb_dist):
 		bpy.data.objects.get('Lamp').location = Vector([i_d*0.5/nb_dist,0.0,0.0]);
+		delete_temp_mesh();
+		create_scene_facets.create_random_grid('temp_mesh',2,3,scene,cam,ang_var,dis_avg,True);
 		name_gen = exp_name + str(i_d)
 		generated_filename = name_gen;
 		get_data_script.gen_file_scene(bpy,generated_filename+'.json',generated_filename+'.png',output_folder);
