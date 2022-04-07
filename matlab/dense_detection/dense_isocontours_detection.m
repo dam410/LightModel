@@ -727,6 +727,41 @@ function [norm_L2,gradient_norm_L2] = fun_opt_persp_L2_only_h(I,pt_in_poly,I_pt,
 	end
 end
 
+
+%  This version of the optimizer for the perspectivity enforce monotonic behavior by summing square of a_vect
+%	to create r_vect spline control points
+function [H_opt_normalized,r_opt] = optimize_perspectivity_monotonic(I,pt_in_poly,I_pt,I_vect,...
+		invK,x_init,H_normalized,NB_R,R_vect)
+
+	% We are using similar setting and enforce levenberg-marquardt
+	options_perspective = optimoptions('lsqnonlin');
+        options_perspective.Algorithm = 'levenberg-marquardt';
+        options_perspective.Display = 'off';
+        options_perspective.StepTolerance = 1e-12;
+        options_perspective.FunctionTolerance = 1e-10;
+        options_perspective.MaxIter = 250;
+        options_perspective.SpecifyObjectiveGradient = true;
+        options_perspective.CheckGradients = false;
+        options_perspective.MaxFunctionEvaluations = 20000;
+
+	% Use sqrt of the additive component so that we do not need explicit constraint
+	%	to keep monotonic spline
+	as_vect_init = sqrt(x_init(5:end));
+	x_init = [x_init(1:4);as_vect_init];
+	fun_opt = @(param) evaluate_error_homography_monotone(I,pt_in_poly,I_pt,I_vect,...
+		vector_to_perspectivity_minimal_param(param(1:4),invK),param(5:(4+NB_R)).^2);
+	
+	tic;
+        [x_opt,~,~,~,output] = lsqnonlin(fun_opt,x_init,lb,ub,options_perspective);
+        toc
+
+	[I_pt_proj,r_proj,err] = evaluate_error_homography_monotone_detailed(I,pt_in_poly,I_pt,I_vect,...
+        vector_to_perspectivity_minimal_param(x_opt(1:4),invK),x_opt(5:(4+NB_R)).^2);
+        H_opt_normalized = vector_to_perspectivity_minimal_param_display(x_opt(1:4),invK)*H_normalized;
+        r_opt = R_vect*x_opt(5:(4+NB_R)).^2;
+
+end
+
 function [H_opt_normalized,r_opt] = optimize_perspectivity(I,pt_in_poly,I_pt,I_vect,...
 		invK,x_init,H_normalized,NB_R,R_vect,lb_angle,ub_angle)
 
