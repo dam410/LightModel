@@ -163,7 +163,7 @@ def get_render_property(scene):
 	obj_dict['display_device'] = scene.display_settings.display_device;
 	obj_dict['view_transform'] = scene.view_settings.view_transform;
 	obj_dict['look'] = scene.view_settings.look;
-	if hasattr(scene.node_tree,'nodes') and scene.node_tree.nodes.find("NoiseLevel"):
+	if hasattr(scene.node_tree,'nodes') and scene.node_tree.nodes.find("NoiseLevel")>-1:
 		obj_dict['noise_level'] = scene.node_tree.nodes["NoiseLevel"].outputs[0].default_value;
 	else:
 		obj_dict['noise_level'] = 0;
@@ -511,7 +511,8 @@ def create_realdata_problem_replicate(bpy,folder):
 			j_str = "_noise_level_"+"{:0>2d}".format(int(i_noise_level));
 			generated_filename = name_gen + i_str + j_str
 			source.location = original_source_location + Vector([i_source_dx/100.0,0.0,0.0]);
-			bpy.context.scene.node_tree.nodes["NoiseLevel"].outputs[0].default_value = i_noise_level/20.0;
+			if hasattr(scene.node_tree,'nodes') and scene.node_tree.nodes.find("NoiseLevel"):
+				bpy.context.scene.node_tree.nodes["NoiseLevel"].outputs[0].default_value = i_noise_level/20.0;
 			gen_file_scene(bpy,generated_filename+'.json',generated_filename+'.png',folder);
 
 

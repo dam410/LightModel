@@ -20,7 +20,7 @@ function [err,J_err] = evaluate_error_homography_monotone(I,pt_in,I_pt,I_vect,H,
 	% Calculate the squared radius
 	[r_pt,J_r_pt] = radius_from_H(pt_in,H);
         [nb_pt,nb_param_h] = size(J_r_pt);
-	try
+	%try
 	if nargout > 1
 		% With Jacobian calculation
 		[pp,J_pp_mat,J_breaks] = monotone_spline(r_vect,I_vect);
@@ -36,12 +36,13 @@ function [err,J_err] = evaluate_error_homography_monotone(I,pt_in,I_pt,I_vect,H,
 		pp = monotone_spline(r_vect,I_vect);
 		I_pt_proj = ppval(pp,r_pt);
 	end
-	catch exception
-		%disp('Problem of non increasing r_vect');
-		I_pt_proj = spline(r_vect,I_vect,r_pt);
-		J_err = zeros(length(I_pt_proj),nb_param_h+n_vect);
-	end
+	%%catch exception
+	%	%disp('Problem of non increasing r_vect');
+	%	I_pt_proj = spline(r_vect,I_vect,r_pt);
+	%	J_err = zeros(length(I_pt_proj),nb_param_h+n_vect);
+	%end
 	% Calculate the final error and its jacobian
         err = I_pt_proj-I_pt;
+	norm(J_err)
 end
 
