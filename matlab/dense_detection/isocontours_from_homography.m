@@ -2,6 +2,9 @@
 %	if image points are given, we use them instead
 %function [points_iso,curves_iso] = isocontours_from_homography(poly_2D_mask,pt_in_poly,H_opt,N_circ)
 function [points_iso,curves_iso] = isocontours_from_homography(poly_2D,H_opt,N_circ,I_pt,pt_im,spline_vector)
+	% Just a trick to use only 3 arguments
+	if nargin < 4
+	end
 	%[r_circle] = effective_radius(pt_in_poly,H_opt,N_circ);
 	[r_circle] = effective_radius(transpose(poly_2D),H_opt,N_circ);
 	t = 0:(2*pi/5000):2*pi;

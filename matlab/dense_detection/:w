@@ -1,0 +1,8 @@
+function [] = radius_from_H(pt_in,H)
+	nb_pt = size(pt_in,1);
+	proj_pt = [pt_in,ones(nb_pt,1)]*transpose(H);
+	Qx = proj_pt(:,1);
+	Qy = proj_pt(:,2);
+	Qz = proj_pt(:,3);
+
+end

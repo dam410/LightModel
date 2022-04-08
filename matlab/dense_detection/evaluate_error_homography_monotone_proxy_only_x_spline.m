@@ -12,10 +12,15 @@
 % Output parameters :
 %	err : Difference between I_pt and model interpolated values
 %	J_err : Jacobian of the error with variable parameters, [H(:);r_vect(:)]
-function [err,J_err] = evaluate_error_homography_monotone_proxy_only_x_spline(I,pt_in,I_pt,I_vect,H,a_vect)
-	a_vect
-	[err,J_err_full] = evaluate_error_homography_monotone(I,pt_in,I_pt,I_vect,H,a_vect);
+function [err,J_err] = evaluate_error_homography_monotone_proxy_only_x_spline(I,pt_in,I_pt,I_vect,H,as_vect)
+	% Now we suppose that a_vect is only the sqrt of the full incremental function
+	%	-> We need to update the jacobian accordingly
+	[err,J_err_full] = evaluate_error_homography_monotone(I,pt_in,I_pt,I_vect,H,as_vect.^2);
 	n_end = size(J_err_full,2);
-	J_err = J_err_full(:,1:(n_end-length(I_vect)));
+	n_end_param = n_end-2*length(I_vect);
+	n_end_xspline = n_end-length(I_vect);
+	J_err_param = J_err_full(:,1:n_end_param);
+	J_err_spline = J_err_full(:,(n_end_xspline+1):n_end);%.*transpose(as_vect);
+	J_err = [J_err_param,J_err_spline];
 end
 

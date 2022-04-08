@@ -43,6 +43,5 @@ function [err,J_err] = evaluate_error_homography_monotone(I,pt_in,I_pt,I_vect,H,
 	%end
 	% Calculate the final error and its jacobian
         err = I_pt_proj-I_pt;
-	norm(J_err)
 end
 

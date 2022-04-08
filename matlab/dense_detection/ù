@@ -60,7 +60,6 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 	optim_results = cell(1,n_p);
 	pt_barycenters = cell(1,n_p);
 	pt_centerss = cell(1,n_p);
-	is_data_normalized = true;
 	switch mode
 		case 'perspective'
 			initialization_type = 'rough';
@@ -81,13 +80,6 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 			initialization_type = 'rough';
 			first_opti = 'perspectivity';
 			ippe = 'no';
-			%second_opti = 'perspectivity';
-			second_opti = 'no';
-		case 'rotation'
-			initialization_type = 'rough';
-			first_opti = 'rotation';
-			ippe = 'no';
-			is_data_normalized = false;
 			%second_opti = 'perspectivity';
 			second_opti = 'no';
 		case 'perspectivity_no_ambiguity'
@@ -165,17 +157,11 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 			imshow(I_test/255);
 		end
 
-		%% Data normalization if needed, not used in perspectivity or rotation case H_normalized = eye(3)
-		if is_data_normalized
-			pt_in_centered = pt_in_poly-pt_barycenter;
-			var_pt = var(pt_in_centered);
-			pt_in_normalized = [pt_in_centered(:,1)./var_pt(1),pt_in_centered(:,2)./var_pt(2)];
-			H_normalized = [var_pt(1),0,pt_barycenter(1);0,var_pt(2),pt_barycenter(2);0,0,1];
-		else
-			pt_in_normalized = pt_in_poly;
-			H_normalized = eye(3);
-
-		end
+		%% Data normalization
+		pt_in_centered = pt_in_poly-pt_barycenter;
+		var_pt = var(pt_in_centered);
+		pt_in_normalized = [pt_in_centered(:,1)./var_pt(1),pt_in_centered(:,2)./var_pt(2)];
+		H_normalized = [var_pt(1),0,pt_barycenter(1);0,var_pt(2),pt_barycenter(2);0,0,1];
 
 		% Calculate the initial parameters
 		% 	If nargin>3, homography is given, we are using it as initialization
@@ -202,11 +188,11 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 		a_vect_init = inv_R_vect*r_vect_init;
 
 		% Calculate and display the variance of the points before the optimisation
-		[I_pt_proj,r_proj_init,err_opt] = evaluate_error_homography_monotone_detailed(...
-                        I,pt_in_normalized,I_pt,I_vect,vector_to_homography_perspective(h_vect_init),...
-			inv_R_vect*r_vect_init);
-                %display_spline_function(r_vect_init,r_proj_init,I_vect,I_pt,...
-		%	'Display the variance before optimisation');
+		[I_pt_init,r_proj_init,err_init] = ...
+			evaluate_error_homography_monotone_detailed(I,pt_in_poly,I_pt,I_vect,...
+			vector_to_homography_perspective(h_vect_init),a_vect_init);
+		display_spline_function(r_vect_init,r_proj_init,I_vect,I_pt,...
+			'Display the variance before optimisation');
 
 
 		%% Display initial error in 3D
@@ -346,24 +332,8 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 				vector_to_homography_perspective(h_vect_init)*inv(H_normalized));
 			[v_init_persp,scale] = vector_init_to_perspectivity_minimal_param(h_vect_init_not_normalized,inv(K));
 			x_init = [v_init_persp;a_vect_init./(scale.^2)];
-			% Method without changing intensity in control point
-			[H_opt_normalized,r_opt] = optimize_perspectivity_monotonic(I,pt_in_poly,I_pt,I_vect,...
+			[H_opt_normalized,r_opt] = optimize_perspectivity(I,pt_in_poly,I_pt,I_vect,...
 				inv(K),x_init,H_normalized,NB_R,R_vect);
-			% Changing intensity in control point
-			%[H_opt_normalized,r_opt,I_vect_opt] = optimize_perspectivity_full_cp(I,pt_in_poly,I_pt,I_vect,...
-			%	inv(K),x_init,H_normalized,NB_R,R_vect);
-		case 'rotation'
-			% Model based on simple rotation of the main axis H = R
-			% Note : There is no normalization in this case H_normalized = eye(3)
-			h_vect_init_not_normalized = homography_to_vector_perspective(...
-                                vector_to_homography_perspective(h_vect_init)*inv(H_normalized));
-			[v_init_persp,scale] = vector_init_to_perspectivity_minimal_param(...
-				h_vect_init_not_normalized,inv(K));
-                        x_init = [v_init_persp;a_vect_init./(scale.^2)];
-                        [v_init_persp,scale] = vector_init_to_rotation_param(h_vect_init,inv(K));
-                        x_init = [v_init_persp;a_vect_init./(scale.^2)];
-                        [H_opt_normalized,r_opt] = optimize_rotation_only(I,pt_in_poly,I_pt,I_vect,...
-                                inv(K),x_init,NB_R,R_vect);
 		case 'perspectivity_L1'
 			options_L1 = optimoptions('fmincon');
 			options_L1.SpecifyObjectiveGradient = false;
@@ -443,15 +413,11 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 			r_opt = R_vect*x_opt(9:end);
 		end
 		H_opt = H_opt_normalized*inv(H_normalized);
-		% Just reaffect all control points intensity with the optimized one
-		if exist('I_vect_opt')
-			I_vect = I_vect_opt;
-		end
 
 		% Calculate the error after first optimization
 		[I_pt_proj,r_proj,err_opt] = evaluate_error_homography_monotone_detailed(...
 			I,pt_in_poly,I_pt,I_vect,H_opt,inv_R_vect*r_opt);
-		%display_spline_function(r_opt,r_proj,I_vect,I_pt,'Display the variance after optimisation');
+		display_spline_function(r_opt,r_proj,I_vect,I_pt,'Display the variance after optimisation');
 
 
 		% Displaying error
@@ -727,60 +693,12 @@ function [norm_L2,gradient_norm_L2] = fun_opt_persp_L2_only_h(I,pt_in_poly,I_pt,
 	end
 end
 
-
-%  This version of the optimizer for the perspectivity enforce monotonic behavior by summing square of a_vect
-%	to create r_vect spline control points
-function [H_opt_normalized,r_opt] = optimize_perspectivity_monotonic(I,pt_in_poly,I_pt,I_vect,...
-		invK,x_init,H_normalized,NB_R,R_vect)
-
-	% We are using similar setting and enforce levenberg-marquardt
-	options_perspective = optimoptions('lsqnonlin');
-        options_perspective.Algorithm = 'levenberg-marquardt';
-        options_perspective.Display = 'off';
-        options_perspective.StepTolerance = 1e-12;
-        options_perspective.FunctionTolerance = 1e-10;
-        options_perspective.MaxIter = 200;
-        options_perspective.SpecifyObjectiveGradient = false;
-        options_perspective.CheckGradients = false;
-        options_perspective.MaxFunctionEvaluations = 10000;
-
-	% Sample the point use in the optimisation at least by 2
-	permutation_0 = randperm(length(I_pt));
-	% Select first half point
-	keep = 0.3;
-	n_half = floor(length(I_pt)*keep);
-	rand_half = permutation_0(1:n_half);
-	I_pt = I_pt(rand_half,:);
-	pt_in_poly = pt_in_poly(rand_half,:);
-	
-
-	% Use sqrt of the additive component so that we do not need explicit constraint
-	%	to keep monotonic spline
-	%as_vect_init = sqrt(x_init(5:end));
-	as_vect_init = sqrt(x_init(5:end));
-	x_init = [x_init(1:4);as_vect_init];
-	fun_opt = @(param) evaluate_error_homography_monotone_proxy_only_x_spline(I,pt_in_poly,I_pt,I_vect,...
-		vector_to_perspectivity_minimal_param(param(1:4),invK),param(5:(4+NB_R)));
-
-	% Calculate the difference between jacobian
-	
-	tic;
-        [x_opt,~,~,~,output] = lsqnonlin(fun_opt,x_init,[],[],options_perspective);
-        toc
-
-	[I_pt_proj,r_proj,err] = evaluate_error_homography_monotone_detailed(I,pt_in_poly,I_pt,I_vect,...
-        vector_to_perspectivity_minimal_param(x_opt(1:4),invK),x_opt(5:(4+NB_R)).^2);
-        H_opt_normalized = vector_to_perspectivity_minimal_param_display(x_opt(1:4),invK)*H_normalized;
-        r_opt = R_vect*x_opt(5:(4+NB_R)).^2;
-
-end
-
 function [H_opt_normalized,r_opt] = optimize_perspectivity(I,pt_in_poly,I_pt,I_vect,...
 		invK,x_init,H_normalized,NB_R,R_vect,lb_angle,ub_angle)
 
 	options_perspective = optimoptions('lsqnonlin');
 	options_perspective.Algorithm = 'trust-region-reflective';
-	options_perspective.Display = 'iter-detailed';
+	options_perspective.Display = 'off';
 	options_perspective.StepTolerance = 1e-12;
 	options_perspective.FunctionTolerance = 1e-10;
 	options_perspective.MaxIter = 250;
@@ -791,7 +709,6 @@ function [H_opt_normalized,r_opt] = optimize_perspectivity(I,pt_in_poly,I_pt,I_v
 		lb_angle = [-Inf;0];
 		ub_angle = [Inf;pi/2];
 	end
-	%lb = [lb_angle;-Inf*ones(3,1);zeros(NB_R-1,1)];
 	lb = [lb_angle;-Inf*ones(3,1);zeros(NB_R-1,1)];
 	ub = [ub_angle;Inf*ones(2+NB_R,1)];
 	fun_opt = @(param) evaluate_error_homography_monotone(I,pt_in_poly,I_pt,I_vect,...
@@ -823,37 +740,5 @@ function [H_opt_normalized,r_opt] = optimize_perspectivity(I,pt_in_poly,I_pt,I_v
 	vector_to_perspectivity_minimal_param(x_opt(1:4),invK),x_opt(5:(4+NB_R)));
 	H_opt_normalized = vector_to_perspectivity_minimal_param_display(x_opt(1:4),invK)*H_normalized;
 	r_opt = R_vect*x_opt(5:(4+NB_R));
-end
-
-function [H_opt_normalized,r_opt,I_vect_opt] = optimize_perspectivity_full_cp(I,pt_in_poly,I_pt,I_vect,...
-		invK,x_init_0,H_normalized,NB_R,R_vect,lb_angle,ub_angle)
-
-	options_perspective = optimoptions('lsqnonlin');
-	options_perspective.Algorithm = 'trust-region-reflective';
-	options_perspective.Display = 'off';
-	options_perspective.StepTolerance = 1e-12;
-	options_perspective.FunctionTolerance = 1e-10;
-	options_perspective.MaxIter = 250;
-	options_perspective.SpecifyObjectiveGradient = false;
-	options_perspective.CheckGradients = false;
-	options_perspective.MaxFunctionEvaluations = 20000;
-	if nargin<12
-		lb_angle = [-Inf;0];
-		ub_angle = [Inf;pi/2];
-	end
-	lb = [lb_angle;-Inf*ones(3,1);zeros(NB_R-1,1);zeros(NB_R,1)];
-	ub = [ub_angle;Inf*ones(2+NB_R,1);255*ones(NB_R,1)];
-	fun_opt = @(param) evaluate_error_homography_monotone(I,pt_in_poly,I_pt,transpose(param((5+NB_R):4+2*NB_R)),...
-	vector_to_perspectivity_minimal_param(param(1:4),invK),param(5:(4+NB_R)));
-	x_init = [x_init_0;transpose(I_vect)];
-	tic;
-	[x_opt,~,~,~,output] = lsqnonlin(fun_opt,x_init,lb,ub,options_perspective);
-	toc
-	% Calculate the projected intensity we would want
-	[I_pt_proj,r_proj,err] = evaluate_error_homography_monotone_detailed(I,pt_in_poly,I_pt,I_vect,...
-	vector_to_perspectivity_minimal_param(x_opt(1:4),invK),x_opt(5:(4+NB_R)));
-	H_opt_normalized = vector_to_perspectivity_minimal_param_display(x_opt(1:4),invK)*H_normalized;
-	r_opt = R_vect*x_opt(5:(4+NB_R));
-	I_vect_opt = transpose(x_opt((5+NB_R):4+2*NB_R));
 end
 
