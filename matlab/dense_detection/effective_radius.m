@@ -11,9 +11,14 @@ function [r_circle] = effective_radius(pt_in,H_opt,N_CIRC)
         proj_pt = [pt_in,ones(nb_pt,1)]*transpose(H_opt);
         proj_pt = proj_pt./proj_pt(:,3);
         r_pt = sqrt(proj_pt(:,1).^2+proj_pt(:,2).^2);
-        min_r = min(r_pt);
-        max_r = max(r_pt);
-	max_r = min_r+0.75*(max_r-min_r);
-        r_circle_full = min_r:(max_r-min_r)/(N_CIRC+1):max_r;
-        r_circle = r_circle_full(2:(end-1));
+	% Prendre la médiane si on ne s'intéresse qu'à un seul isocontour
+	if N_CIRC == 1
+		r_circle = median(r_pt);
+	else
+		min_r = min(r_pt);
+		max_r = max(r_pt);
+		max_r = min_r+0.75*(max_r-min_r);
+		r_circle_full = min_r:(max_r-min_r)/(N_CIRC+1):max_r;
+		r_circle = r_circle_full(2:(end-1));
+	end
 end
