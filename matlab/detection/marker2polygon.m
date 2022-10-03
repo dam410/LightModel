@@ -1,4 +1,12 @@
-function [mesh_] = marker2polygon(cell_R_i,cell_t_i,tagSize,isboard)
+function [mesh_] = marker2polygon(cell_R_i,cell_t_i,tagSize,isboard,options)
+%(cell_R_i,cell_t_i,tagSize,isboard)
+	arguments
+		cell_R_i (1,:) cell
+		cell_t_i (1,:) cell
+		tagSize (1,1) double
+		isboard (1,1) double
+		options.specific_coordinates (2,:) double
+	end
 	% For each marker we calculate 3 points
 	nb_marqueur = length(cell_R_i);
 	P = [];
@@ -62,6 +70,20 @@ function [mesh_] = marker2polygon(cell_R_i,cell_t_i,tagSize,isboard)
 	polygon.normal = Nd(1:3);
 	% From Matlab convention for starting index to C/Python
 	polygon.vertices_index = k(1:(end-1))-1;
+
+	% If we have the option to select a specific polygonal design
+	% Remake the entire polygon
+	if isfield(options,'specific_coordinates')
+		% Specific coordinates are barycentric coordinates based on the markers corners
+		% See file calculate_polgon_markers in general_function
+		p_poly_coord = options.specific_coordinates;
+		data.normals = transpose(p_poly_coord)*data.normals(1:2,:);
+		data.vertices = transpose(p_poly_coord)*(data.vertices(1:2,:)-data.vertices(3,:))+...
+			data.vertices(3,:);
+		polygon.vertices_index = 0:1:(length(p_poly_coord)-1);
+
+	end
+	
 	data.polygons = [polygon];
 	mesh_.data = data;
 end

@@ -33,10 +33,10 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 	[n,m] = size(I);
 	n_p = length(polys_2D);
 	%I_gaussian = I;
-	%I = wiener2(I,[11,11]);
-	I_gaussian = imgaussfilt(I,3,'FilterSize',5);
+	I = wiener2(I,[15,15]);
+	I_gaussian = imgaussfilt(I,3,'FilterSize',11);
 	% Mode to parameter the type of optimization we want
-	mode = options.Mode
+	mode = options.Mode;
 	display = options.Display;
 	% Number of radius to interpolate the spline
 	NB_R = options.Nb_R;

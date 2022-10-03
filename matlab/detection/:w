@@ -1,0 +1,13 @@
+function [] = function_to_delete(n)
+	arguments
+		n (1,1) double
+		options.Test (:,:) double
+	end
+	if ~exist(options.Test)
+		disp('Not exist');
+	elseif isempty(options.Test)
+		disp('Is empty');
+	else
+		disp('Exist and not empty');
+	end
+end

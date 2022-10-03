@@ -1,4 +1,4 @@
-function display_spline_function(r_opt,r_proj,I_vect,I_pt,fig_name)
+function [fig_handle] = display_spline_function(r_opt,r_proj,I_vect,I_pt,fig_name)
 	nb_pts = 100;
 	NB_R = length(r_opt);
 	R_vect = tril(ones(NB_R));
@@ -13,11 +13,12 @@ function display_spline_function(r_opt,r_proj,I_vect,I_pt,fig_name)
 		yy = spline(r_opt,I_vect,xx);
 	end
 	I_proj = ppval(pp,r_proj);
-	figure('Name',fig_name);
+	fig_handle = figure('Name',fig_name);
 	plot(xx,yy,'-b');
 	hold on;
 	plot(r_proj(:),I_pt(:),'+r');
 	plot(r_opt,I_vect,'+g');
+	title(fig_name);
 	% Order the value to calculate a sliding window for standard deviation
 	[I_pt_sorted,sorting_index] = sort(I_pt);
 	r_proj_sorted = r_proj(sorting_index);
