@@ -80,9 +80,9 @@ function [] = reconstruction_from_isophotes(options)
 	I_rgb_undistorted = undistortImage(I_rgb,intrinsics,"OutputView","same");
 	end_img_file = length(img_file);
 	new_name = [img_file(1:(end_img_file-4)),'_undistorted',img_file((end_img_file-3):end_img_file)];
-	imwrite(I_rgb_undistorted,new_name);
+	imwrite(I_rgb_undistorted/255,new_name);
 	K = transpose(intrinsics.IntrinsicMatrix);
-	save([resFolder,'data_image_undistorted_',savename,'.mat'],...
+	save([resFolder,savename,'_data_image_undistorted.mat'],...
 		'new_name','K','intrinsics');
 	% Remove a vignetting effect
 
@@ -112,7 +112,7 @@ function [] = reconstruction_from_isophotes(options)
 		otherwise
 			disp('TODO: do something if no auto detection hand selection');
 	end
-	save([resFolder,'data_patch_',savename,'.mat'],'data','polys_2D');
+	save([resFolder,savename,'_data_patch.mat'],'data','polys_2D');
 
 	%imshow(I_rgb_undistorted);
 	%hold on;
@@ -132,14 +132,50 @@ function [] = reconstruction_from_isophotes(options)
 		case 'bottom-up'
 			disp('TODO add bottom up part in the code');
 		case 'top-down'
-			[homog_p] = dense_isocontours_detection(I_double,data.K,polys_2D,...
+			[homog_p,~,spline_param] = dense_isocontours_detection(I_double,data.K,polys_2D,...
 				'Mode',options.IsophoteModel,...
 				'Display','on',...
 				'Nb_R',options.NbSplinePoint);
-			data = add_isocontours_to_homog(data,polys_2D,homog_p,options.NbSplinePoint);
+			data = add_isocontours_to_homog(data,polys_2D,homog_p,2);
+			save('all_data_temp.mat');
+			%% Display the spline for each curve
+			for i_p = 1:length(homog_p)
+				% Get the spline parameters
+				sparam = spline_param{i_p};
+				r_opt = transpose(sparam(1,:));
+				I_vect = sparam(2,:);
+				H_opt = homog_p{i_p};
+				R_vect = tril(ones(options.NbSplinePoint));
+				inv_R_vect = inv(R_vect);
+				r_opt = transpose(sparam(1,:));
+				% Project the points
+				[pt_in_poly,I_pt,pt_barycenter,I_vect,ind_pt] = img_points_from_poly(I_double,polys_2D{i_p},...
+					options.NbSplinePoint);
+				[I_pt_proj,r_proj,err_opt] = evaluate_error_homography_monotone_detailed(...
+					I_double,pt_in_poly,I_pt,I_vect,H_opt,inv_R_vect*r_opt);
+				% Display the spline
+				[fig_handle] = display_spline_function(r_opt,r_proj,I_vect,I_pt,['Spline model fitted to patch n°',num2str(i_p)]);
+				% Save the spline
+				saveas(fig_handle,[resFolder,savename,'_figure_spline_fitted_patch_',num2str(i_p),'.png']);
+			end
 		otherwise
+			disp('Unrecognized detection method');
 	end
-	save([resFolder,'data_detection_',savename,'.mat'],'data','homog_p');
+	save([resFolder,savename,'_data_detection.mat'],'data','homog_p','spline_param');
+
+	% Display a figure with all the isophotes
+	fig_conic = figure('Name','Fitted isophote');
+	imshow(I_double/255);
+	hold on;
+	for i_p = 1:length(homog_p)
+		displayEllipse(data.isocontour.CurveParameters{i_p}{1}{1},'g');
+		displayEllipse(data.isocontour.CurveParameters{i_p}{1}{end},'g');
+		plot(data.isocontour.Points{i_p}{1}{1}(:,2),data.isocontour.Points{i_p}{1}{1}(:,1),'+r');
+		plot(data.isocontour.Points{i_p}{1}{end}(:,2),data.isocontour.Points{i_p}{1}{end}(:,1),'+r');
+	end
+	xlim([1,size(I_double,2)]);
+	ylim([1,size(I_double,1)]);
+	saveas(fig_conic,[resFolder,savename,'_figure_detected_isophotes.png']);
 
 	% Estimate the scene elements parameters depending on the configuration
 	% Input:
@@ -179,9 +215,11 @@ function [] = reconstruction_from_isophotes(options)
 			end
 		otherwise
 	end
-	save([resFolder,'data_pose_estimation_',savename,'.mat'],'dssp','psp','ps');
+	save([resFolder,savename,'_data_pose_estimation.mat'],'dssp','psp','ps');
 
-	visualize_results_2(data,dssp,psp,ps);
+	[~,~,~,fig_3D] = visualize_results_2(data,dssp,psp,ps);
+	camup
+	
 
 	%% Possible global refinement of the scene elements parameters
 	%% Input:
