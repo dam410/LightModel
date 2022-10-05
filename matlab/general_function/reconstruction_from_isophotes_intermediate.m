@@ -136,8 +136,7 @@ function [] = reconstruction_from_isophotes(options)
 				'Mode',options.IsophoteModel,...
 				'Display','on',...
 				'Nb_R',options.NbSplinePoint);
-			data = add_isocontours_to_homog(data,polys_2D,homog_p,2);
-			save('all_data_temp.mat');
+			data = add_isocontours_to_homog(data,polys_2D,homog_p,3);
 			%% Display the spline for each curve
 			for i_p = 1:length(homog_p)
 				% Get the spline parameters
@@ -161,7 +160,8 @@ function [] = reconstruction_from_isophotes(options)
 		otherwise
 			disp('Unrecognized detection method');
 	end
-	save([resFolder,savename,'_data_detection.mat'],'data','homog_p','spline_param');
+	save([resFolder,savename,'_data_detection.mat'],'data','homog_p','homog_p_2','spline_param');
+	save('all_data_temp.mat');
 
 	% Display a figure with all the isophotes
 	fig_conic = figure('Name','Fitted isophote');
@@ -218,7 +218,21 @@ function [] = reconstruction_from_isophotes(options)
 	save([resFolder,savename,'_data_pose_estimation.mat'],'dssp','psp','ps');
 
 	[~,~,~,fig_3D] = visualize_results_2(data,dssp,psp,ps);
-	camup
+	% Calcul du point centrale des plans observés
+	pt_mid = mean([data.groundtruth.ScenePlanePolygon{:}],2)/2;
+
+	% Set the camera up vector and focus point
+	camup([0;1;0]);
+	camtarget(pt_mid);
+	% Calculate a position for the 3D view camera
+	nb_img = 40;
+	for i=1:nb_img
+		theta=2*pi*i/nb_img;
+		pt_cam = [norm(pt_mid)*1.5*cos(theta)-pt_mid(1);norm(pt_mid)/2;norm(pt_mid)*1.5*sin(theta)-pt_mid(2)];
+		campos(pt_cam);
+		saveas(fig_3D,[resFolder,savename,'_reconstruction_animation_',num2str(i),'.png']);
+		pause(0.1);
+	end
 	
 
 	%% Possible global refinement of the scene elements parameters
