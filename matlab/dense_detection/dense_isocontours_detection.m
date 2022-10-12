@@ -235,11 +235,11 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 		switch first_opti 
 		case 'perspective'
 			options_perspective = optimoptions('lsqnonlin');
-			options_perspective.Algorithm = 'trust-region-reflective';
+			options_perspective.Algorithm = 'levenberg-marquardt';
 			options_perspective.Display = 'iter-detailed';
 			options_perspective.StepTolerance = 1e-12;
 			options_perspective.FunctionTolerance = 1e-10;
-			options_perspective.MaxIter = 200;
+			options_perspective.MaxIter = 250;
 			options_perspective.SpecifyObjectiveGradient = false;
 			options_perspective.CheckGradients = false;
 			options_perspective.FiniteDifferenceType = 'central';
@@ -248,8 +248,10 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 			x_init = [h_vect_init;a_vect_init];
 			disp(['First optimization with ',first_opti,' homography']);
 			% Define homography upper and lower bound
-			lb = [-Inf*ones(8,1);[-Inf;zeros(NB_R-1,1)]];
-			ub = Inf*ones(8+NB_R,1);
+			%lb = [-Inf*ones(8,1);[-Inf;zeros(NB_R-1,1)]];
+			%ub = Inf*ones(8+NB_R,1);
+			lb = [];
+			ub = [];
 			tic;
 			try
 				[x_opt,~,~,~,output] = lsqnonlin(fun_opt,x_init,lb,ub,options_perspective);
@@ -464,7 +466,6 @@ function [homogs_1,homogs_2,spline_params,optim_results] = dense_isocontours_det
 			% Display the spline interpolated
 			display_spline_function(r_opt,r_proj,I_vect,I_pt,...
 			'Spline function interpolated after first optimization');
-			
 			pause(0.5);
 		end
 
@@ -736,7 +737,7 @@ function [H_opt_normalized,r_opt] = optimize_perspectivity_monotonic(I,pt_in_pol
 	% We are using similar setting and enforce levenberg-marquardt
 	options_perspective = optimoptions('lsqnonlin');
         options_perspective.Algorithm = 'levenberg-marquardt';
-        options_perspective.Display = 'off';
+        options_perspective.Display = 'iter-detailed';
         options_perspective.StepTolerance = 1e-12;
         options_perspective.FunctionTolerance = 1e-10;
         options_perspective.MaxIter = 200;

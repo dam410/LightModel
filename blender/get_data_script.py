@@ -62,7 +62,7 @@ def get_lamp_dict(lamp):
 		lamp_spot_dict['spot_blend'] = lamp.data.spot_blend;
 		lamp_dict['data'] = lamp_spot_dict;
 	else:
-		print('Error : Type of lamp not recognized');
+		print('Export Error: Type of lamp not recognized');
 	return lamp_dict;
 
 # Get the specific properties of a camera in a dict
@@ -82,7 +82,7 @@ def get_cam_dict(cam):
 	#cam_dict['pixel_aspect_ratio'] = scene.render.pixel_aspect_x/scene.render.pixel_aspect_y;
 	return cam_dict;
 
-# Get the specific properties of a mesh in a dict
+# Get the specific propertiesof a mesh in a dict
 def get_mesh_dict(mesh):
 	mesh_dict = {};
 	# Accumulate the vertices and their normals in a list

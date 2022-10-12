@@ -11,12 +11,15 @@ function [Xc_best,N_best] = plane_orientation_from_circular_contours(K_im,T_cam,
 		pt_vis = [];
 	end
 	for i=1:nb_iso
-		ell = transpose_ellipse(circular_isocontours{i});
+		%ell = transpose_ellipse(circular_isocontours{i});
+		T_mat = [0,1,0;1,0,0;0,0,1];
+		ell = circular_isocontours{i};
                 E = param2ellipse(ell);
                 % Direct method adapt for colocalized source/camera
-                Q = K_im'*E*K_im;
+                Q = K_im'*T_mat*E*T_mat*K_im;
 		%[Xc1,Xc2,~,~,N_i] = image_center(K_im,ell);
-		N_i = vanishing_line_paper_co(Q);
+		[N_1,N_2] = vanishing_line_paper(Q);
+		N_i = [N_1,N_2];
 		% Now calculate the image of the brightest point
 		if size(N_i,2)>1
 			Xc1 = K_im*inv(Q)*N_i(:,1);
@@ -35,7 +38,10 @@ function [Xc_best,N_best] = plane_orientation_from_circular_contours(K_im,T_cam,
 		%normals = transpose(inv(K_im))*N_i(:,1:2);
 		normals = N_i(:,1:2);
 		%N(3*i-2:3*i,:) = transpose(inv(K_im))*[normals(:,1)/norm(normals(:,1)),normals(:,2)/norm(normals(:,2))];
-		N(3*i-2:3*i,:) = [normals(:,1)/norm(normals(:,1)),normals(:,2)/norm(normals(:,2))];
+		N(3*i-2:3*i,:) = [normals(:,1)/norm(normals(:,1)),normals(:,2)/norm(normals(:,2))];			
+		% Reinvert at the end 
+		Xc([1,2],:) = Xc([2,1],:);
+		N([1,2],:) = N([2,1],:);
 	end
 	% Seems complicated but it actually only choose which ambiguous solution
 	%	is correct by comparing the image center estimated position

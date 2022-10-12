@@ -19,6 +19,7 @@ addpath('./detection');
 addpath('./dense_detection');
 addpath('./pose_estimation');
 addpath('./experiment');
+addpath('./general_function');
 addpath('./tools');
 addpath('./SIRFS_release1.6');
 addpath('./SIRFS_release1.6/minFunc_2012');

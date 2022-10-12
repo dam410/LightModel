@@ -4,7 +4,7 @@
 % Specific for the colocalized PLS and optical center
 function [X,N] = plane_orientation_from_circular_contours_co(K_im,T_cam,circular_isocontours,pt_vis);
 	% Calculate orientation of the plane from circular isocontours
-	nb_iso = 1;%length(circular_isocontours);
+	nb_iso = length(circular_isocontours);
 	N_vectors = zeros(3,nb_iso);
 	X_vectors = zeros(3,nb_iso);
 	% Check if a visible point is provided for convention on normal orientation
@@ -22,6 +22,8 @@ function [X,N] = plane_orientation_from_circular_contours_co(K_im,T_cam,circular
 		X = X/X(3);
 		N_vectors(:,i) = N;
 		X_vectors(:,i) = X;
+		X_vectors([1,2],:) = X_vectors([2,1],:);
+                N_vectors([1,2],:) = N_vectors([2,1],:);
 	end
 	N = mean(N_vectors,2);
 	N = N/norm(N);

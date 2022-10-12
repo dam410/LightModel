@@ -14,10 +14,11 @@ function [fig_handle] = display_spline_function(r_opt,r_proj,I_vect,I_pt,fig_nam
 	end
 	I_proj = ppval(pp,r_proj);
 	fig_handle = figure('Name',fig_name);
-	plot(xx,yy,'-b');
-	hold on;
 	plot(r_proj(:),I_pt(:),'+r');
-	plot(r_opt,I_vect,'+g');
+	hold on;
+	plot(r_opt,I_vect,'+g','MarkerSize',10,'LineWidth',3);
+	plot(xx,yy,'-b','LineWidth',3);
+	xlim([min(r_proj(:)),max(r_proj(:))]);
 	title(fig_name);
 	% Order the value to calculate a sliding window for standard deviation
 	[I_pt_sorted,sorting_index] = sort(I_pt);

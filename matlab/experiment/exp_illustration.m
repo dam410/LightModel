@@ -1,10 +1,10 @@
 %% Load the image
-%filename = '/home/dam/Documents/PostDoc_Damien/LightModel/data/exp_illustration/candle_planes.JPG';
+%filename = '/home/dam/Documents/PostDoc_Damien/LightModel/data/exp_illustration/DSC_1234.JPG';
 %
 %% Load the intrinsics
-%load('../data/calibration/matlab_params_7.mat');
+%load('../data/calibration/matlab_params_8.mat');
 %
-%[data,polys_2D,I_undis] = get_data_no_marker_real(filename,cameraParams,6);
+%[data,polys_2D,I_undis] = get_data_no_marker_real(filename,cameraParams,4);
 %
 %intrinsics = cameraParams.Intrinsics;
 %K = [intrinsics.FocalLength(1),0,intrinsics.PrincipalPoint(1);...
@@ -20,6 +20,12 @@ load('data_exp_illustration.mat');
 data_td.polys_2D = polys_2D;
 
 [dssp,psp,ps] = case_8_np(data_td,1);
+figure('Name','Display the PLS on the image');
+imshow(I_undis/max(I_undis(:)));
+hold on;
+PLS_proj = data.K*ps{1};
+plot(PLS_proj(2)/PLS_proj(3),PLS_proj(1)/PLS_proj(3),'+r');
+
 [dssp,psp,ps] = visualize_results_2(data_td,dssp,psp,ps);
 
 save('data_detection_exp_illustration.mat');

@@ -50,6 +50,7 @@ function [] = reconstruction_from_isophotes(options)
 		%	Scale ?
 		options.ReconstructionScale (1,1) double
 		options.AutoScaleReconstruction (1,1) double = 0
+		options.SizeCamera (1,1) double = 0.05
 		% Parameters relative to refinement ('photometric or geometric')
 		options.RefinementCriteria (1,1) string = 'photometric'
 		% Parameters relative to intermediate results
@@ -134,9 +135,10 @@ function [] = reconstruction_from_isophotes(options)
 		case 'top-down'
 			[homog_p,~,spline_param] = dense_isocontours_detection(I_double,data.K,polys_2D,...
 				'Mode',options.IsophoteModel,...
-				'Display','on',...
+				'Display','off',...
 				'Nb_R',options.NbSplinePoint);
 			data = add_isocontours_to_homog(data,polys_2D,homog_p,3);
+			%save('all_data_temp.mat');
 			%% Display the spline for each curve
 			for i_p = 1:length(homog_p)
 				% Get the spline parameters
@@ -146,32 +148,32 @@ function [] = reconstruction_from_isophotes(options)
 				H_opt = homog_p{i_p};
 				R_vect = tril(ones(options.NbSplinePoint));
 				inv_R_vect = inv(R_vect);
-				r_opt = transpose(sparam(1,:));
 				% Project the points
-				[pt_in_poly,I_pt,pt_barycenter,I_vect,ind_pt] = img_points_from_poly(I_double,polys_2D{i_p},...
-					options.NbSplinePoint);
+				[pt_in_poly,I_pt,pt_barycenter,~,ind_pt] = img_points_from_poly(I_double,...
+					polys_2D{i_p},options.NbSplinePoint);
 				[I_pt_proj,r_proj,err_opt] = evaluate_error_homography_monotone_detailed(...
 					I_double,pt_in_poly,I_pt,I_vect,H_opt,inv_R_vect*r_opt);
 				% Display the spline
-				[fig_handle] = display_spline_function(r_opt,r_proj,I_vect,I_pt,['Spline model fitted to patch n°',num2str(i_p)]);
+				[fig_handle] = display_spline_function(r_opt,r_proj,I_vect,I_pt,...
+					['Spline model fitted to patch n°',num2str(i_p)]);
 				% Save the spline
 				saveas(fig_handle,[resFolder,savename,'_figure_spline_fitted_patch_',num2str(i_p),'.png']);
 			end
 		otherwise
 			disp('Unrecognized detection method');
 	end
-	save([resFolder,savename,'_data_detection.mat'],'data','homog_p','homog_p_2','spline_param');
+	save([resFolder,savename,'_data_detection.mat'],'data','homog_p','spline_param');
 	save('all_data_temp.mat');
 
 	% Display a figure with all the isophotes
 	fig_conic = figure('Name','Fitted isophote');
-	imshow(I_double/255);
+	imshow(I_rgb_undistorted/255);
 	hold on;
 	for i_p = 1:length(homog_p)
-		displayEllipse(data.isocontour.CurveParameters{i_p}{1}{1},'g');
-		displayEllipse(data.isocontour.CurveParameters{i_p}{1}{end},'g');
-		plot(data.isocontour.Points{i_p}{1}{1}(:,2),data.isocontour.Points{i_p}{1}{1}(:,1),'+r');
-		plot(data.isocontour.Points{i_p}{1}{end}(:,2),data.isocontour.Points{i_p}{1}{end}(:,1),'+r');
+		displayEllipse(data.isocontour.CurveParameters{i_p}{1}{1},'r');
+		displayEllipse(data.isocontour.CurveParameters{i_p}{1}{end},'r');
+		plot(data.isocontour.Points{i_p}{1}{1}(:,2),data.isocontour.Points{i_p}{1}{1}(:,1),'+g');
+		plot(data.isocontour.Points{i_p}{1}{end}(:,2),data.isocontour.Points{i_p}{1}{end}(:,1),'+g');
 	end
 	xlim([1,size(I_double,2)]);
 	ylim([1,size(I_double,1)]);
@@ -188,36 +190,36 @@ function [] = reconstruction_from_isophotes(options)
 	%	cell array ps
 	switch options.CaseNumber
 		case 1
-			[dssp,psp,ps] = case_1_np_dssp_psp_ps(data)
+			[dssp,psp,ps] = case_1_np_dssp_psp_ps(data);
 		case 2
-			[dssp,psp,ps] = case_2_np_dssp_psp(data)
+			[dssp,psp,ps] = case_2_np_dssp_psp(data);
 		case 3
-			[dssp,psp,ps] = case_3_np_dssp_ps(data)
+			[dssp,psp,ps] = case_3_np_dssp_ps(data);
 		case 4
-			[dssp,psp,ps] = case_4_np_dssp(data)
+			[dssp,psp,ps] = case_4_np_dssp(data);
 		case 5
-			[dssp,psp,ps] = case_5_np_psp_ps(data)
+			[dssp,psp,ps] = case_5_np_psp_ps(data);
 		case 6
-			[dssp,psp,ps] = case_6_np_psp(data)
+			[dssp,psp,ps] = case_6_np_psp(data);
 		case 7
 			if isfield(options,'EndoscopicCase')
-				[dssp,psp,ps] = case_7_co_ps(data)
+				[dssp,psp,ps] = case_7_co_ps(data);
 			else
-				[dssp,psp,ps] = case_7_np_ps(data)
+				[dssp,psp,ps] = case_7_np_ps(data);
 			end
 		case 8
 			if isfield(options,'ReconstructionScale')
-				[dssp,psp,ps] = case_8_np_scaled(data,options.ReconstructionScale)
+				[dssp,psp,ps] = case_8_np_scaled(data,options.ReconstructionScale);
 			elseif options.AutoScaleReconstruction
 				[dssp,psp,ps] = case_8_np(data,norm(data.groundtruth.SourcePosition));
 			else
-				[dssp,psp,ps] = case_8_np(data)
+				[dssp,psp,ps] = case_8_np(data);
 			end
 		otherwise
 	end
 	save([resFolder,savename,'_data_pose_estimation.mat'],'dssp','psp','ps');
 
-	[~,~,~,fig_3D] = visualize_results_2(data,dssp,psp,ps);
+	[dssp,psp,ps,fig_3D] = visualize_results_2(data,dssp,psp,ps,'SizeCamera',options.SizeCamera);
 	% Calcul du point centrale des plans observés
 	pt_mid = mean([data.groundtruth.ScenePlanePolygon{:}],2)/2;
 
@@ -234,20 +236,63 @@ function [] = reconstruction_from_isophotes(options)
 		pause(0.1);
 	end
 	
+	% Add an image with reconstruction on top of the image
+	X_s = ps{1};
+	fig_reproj = figure('Name','Original image');
+	imshow(I_rgb_undistorted/255);
+	hold on;
+	for i_p = 1:length(polys_2D)
+		patch(polys_2D{i_p}(1,:),polys_2D{i_p}(2,:),[0,0,1],'FaceAlpha',.3);
+		points_iso_cell = data.isocontour.Points{i_p}{1};
+		for i_iso = 1:length(points_iso_cell)
+			pts_2D = transpose(points_iso_cell{i_iso});
+			plot(pts_2D(2,:),pts_2D(1,:),'+g');
+                end
+		% Diplay a quiver from Brightest point to Source if not colocalised
+		if norm(X_s) > 1e-6
+			X1 = X_s+dssp{i_p}{1}*psp{i_p}{1}(1:3);
+			X2 = X_s+0.1*dssp{i_p}{1}*psp{i_p}{1}(1:3);
+		else
+		% Otherwise display an orthogonal vector from the middle of the patch
+			X1 = mean(data.groundtruth.ScenePlanePolygon{i_p},2);
+			X2 = X1 - 0.05*psp{i_p}{1}(1:3);
+		end
+		proj_x1 = data.K * X1;
+		proj_x2 = data.K * X2;
+		proj_x1 = proj_x1/proj_x1(3);
+		proj_x2 = proj_x2/proj_x2(3);
+		quiver(proj_x1(1),proj_x1(2),...
+			proj_x2(1)-proj_x1(1),proj_x2(2)-proj_x1(2),...
+			'MarkerMode','manual','Color','r',...
+			'MaxHeadSize',0.5,'Linewidth',2,...
+			'MarkerSize',10,'Autoscale','off','AutoScaleFactor',2);
+        end
+	% Display the source if not colocalised
+	if norm(X_s) > 1e-6
+		proj_X_s = data.K*X_s;
+		proj_X_s = proj_X_s/proj_X_s(3);
+		x1 = proj_X_s(1);
+		x2 = proj_X_s(2);
+		plot(x1,x2,'pk','MarkerFaceColor','y','MarkerSize',15);
+	end
+	saveas(fig_reproj,[resFolder,savename,'_reprojection.png']);
 
-	%% Possible global refinement of the scene elements parameters
-	%% Input:
-        %%       struct data
-        %%       cell array dssp
-        %%       cell array psp
-        %%       cell array ps
-	%%	matrix I_undistorted
-	%%	cell array polys_2D
-        %% Output:
-        %%       cell array dssp_opt
-        %%       cell array psp_opt
-        %%       cell array ps_opt
-	%%	double err_opt
+	
+	
+
+	% Possible global refinement of the scene elements parameters
+	% Input:
+        %       struct data
+        %       cell array dssp
+        %       cell array psp
+        %       cell array ps
+	%	matrix I_undistorted
+	%	cell array polys_2D
+        % Output:
+        %       cell array dssp_opt
+        %       cell array psp_opt
+        %       cell array ps_opt
+	%	double err_opt
 	%[dssp,psp,ps] = complete_plane_pose(data,dssp,psp,ps);
 	%if strcmp(options.RefinementCriteria,'photometric')
 	%	[pts_cell,I_pt_cell,I_vect_cell] = refinement_format(data,I_double,polys_2D);
@@ -260,6 +305,6 @@ function [] = reconstruction_from_isophotes(options)
 	%save([resFolder,'reconstruction_from_isophotes_pose_estimation_opt.mat'],...
 	%	'dssp_opt','psp_opt','ps_opt','err_opt');
 
-	%visualize_results_2(data,dssp_opt,psp_opt,ps_opt);
+	%%visualize_results_2(data,dssp_opt,psp_opt,ps_opt);
 	
 end

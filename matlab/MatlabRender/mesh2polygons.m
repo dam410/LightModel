@@ -8,6 +8,7 @@ function [polys] = mesh2polygons(mesh_,T_cam)
 		inv_T_cam = inv(T_cam);
 		for i = 1:length(mesh_i.data.polygons)
 			% Calculate the two first points and normal in world coordinates
+			size([transpose(mesh_i.data.vertices(mesh_i.data.polygons(i).vertices_index(1)+1,:));1]);
 			P1 = inv_T_cam*T_mesh*[transpose(mesh_i.data.vertices(mesh_i.data.polygons(i).vertices_index(1)+1,:));1];
 			P1 = P1/P1(4);
 			P2 = inv_T_cam*T_mesh*[transpose(mesh_i.data.vertices(mesh_i.data.polygons(i).vertices_index(2)+1,:));1];

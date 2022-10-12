@@ -24,11 +24,24 @@ function [dssp,psp,ps] = case_8_np(data,scale)
 		if iscell(data.isocontour.CurveParameters{i_p}{1})
 			Xc = [];
 			N = [];
+			% With an homography field, it means that it is top-down method, so ne need
+			%	to calculate N and Xc for each isophote, it'll give the same results
 			for i_ambig = 1:length(data.isocontour.CurveParameters{i_p})
-				[Xc_ambig,N_ambig] = plane_orientation_from_circular_contours(data.K,data.T_cam,...
+				if isfield(data,'homography')
+					[Xc_ambig,N_ambig] = plane_orientation_from_circular_contours(data.K,data.T_cam,...
+						{data.isocontour.CurveParameters{i_p}{i_ambig}{1}},pt_vis);
+					N = [N,N_ambig];
+					Xc = [Xc,Xc_ambig];
+					%Xc = data.groundtruth.SourcePosition + data.groundtruth.ScenePlaneDistanceSource{i_p}*data.groundtruth.ScenePlaneOrientation{i_p}(:,3);
+					%Xc = data.K*Xc;
+					%Xc = Xc(1:2)/Xc(3)
+					%N = data.groundtruth.ScenePlaneOrientation{i_p}(:,3);
+				else
+					[Xc_ambig,N_ambig] = plane_orientation_from_circular_contours(data.K,data.T_cam,...
 					data.isocontour.CurveParameters{i_p}{i_ambig},pt_vis);
-				Xc = [Xc,Xc_ambig];
-				N = [N,N_ambig];
+					Xc = [Xc,Xc_ambig];
+					N = [N,N_ambig];
+				end
 			end
 		else
 			[Xc,N] = plane_orientation_from_circular_contours(data.K,data.T_cam,...
@@ -77,8 +90,12 @@ function [dssp,psp,ps] = case_8_np(data,scale)
 			% Calculate the position of the source
 			[d,m] = plucker_matrix_to_dm(ps{1});
 			d = d/norm(d);
+			% By default, set the PLS in front of the camera
+			if d(3) < 0
+				d = -d;
+			end
 			ps{1} = d*scale;
-			% Check whether the point is in front or behidn the camera
+			% Check whether the PLS is in front or behind the camera
 			if isfield(data,'groundtruth')
 				if norm(ps{1}+data.groundtruth.SourcePosition) < norm(ps{1}-data.groundtruth.SourcePosition)
 					ps{1} = -ps{1};
@@ -108,7 +125,8 @@ function [dssp,psp,ps] = case_8_np(data,scale)
 					dssp{i_p}{i_ambig} = h;
 					psp{i_p}{i_ambig} = [N;d];
 					if ~isempty(pt_vis)
-						X = [transpose(pt_vis);1];
+						X = inv(data.K)*[transpose(pt_vis);1];
+						X = X/X(3);
 						% Project X on the actual scene plane
 						lambda_X = -d/dot(X,N);
 						X = lambda_X*X;

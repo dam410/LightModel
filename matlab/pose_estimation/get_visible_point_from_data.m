@@ -6,6 +6,7 @@ function [pts_vis] = get_visible_point_from_data(data,i_p)
 		else
 			pts_vis = data.isocontour.Points{i_p}{1}(1,:);
 		end
+		pts_vis = [pts_vis(2),pts_vis(1)];
 	else
 		pts_vis = [];
 	end

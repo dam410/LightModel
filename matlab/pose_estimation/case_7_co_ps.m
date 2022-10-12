@@ -21,7 +21,27 @@ function [dssp,psp,ps] = case_7_co_ps(data)
 		else
 			curves = data.isocontour.CurveParameters{i_p};
 		end
-		[Xc,N] = plane_orientation_from_circular_contours_co(data.K,data.T_cam,curves,pt_vis);
+		% Check if we actually only need to use the homography, because of top-down method
+		skip = false;
+		if isfield(data,'homography')
+			if iscell(data.homography{i_p})
+				curves = data.isocontour.CurveParameters{i_p}{1};
+				H = inv(data.K)*inv(data.homography{i_p}{1});
+			else
+				curves = data.isocontour.CurveParameters{i_p};
+				H = inv(data.K)*inv(data.homography{i_p});
+			end
+			% If H is only a rotation + canonical projection, we can use it directly to get N
+			R = [H(:,1),H(:,2),H(:,3)/norm(H(:,3))];
+			if norm(transpose(R)*R-eye(3))<1e-3
+				N = R(:,3);
+				Xc = N/N(3);
+				skip = true;
+			end
+		if ~skip
+			[Xc,N] = plane_orientation_from_circular_contours_co(data.K,data.T_cam,curves,pt_vis);
+		end
+		% Get two possible normal using a variation to plane_orientation_from_circular_contours_co
 		%[Xc,N] = plane_orientation_from_circular_contours(data.K,data.T_cam,curves)
 		% Distance to plane cannot be estimated, we set it to 1.0 and calculate h accordingly.
 		psp{i_p} = {[N;0.0]};

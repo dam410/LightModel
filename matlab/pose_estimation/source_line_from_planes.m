@@ -9,7 +9,6 @@ function [L,err] = source_line_from_planes(planes)
 		V = eye(3);
 		S = eye(3);
 	end
-	S
 	L = plucker_dm_to_matrix(V(:,3),zeros(3,1));
 	err = S(3,3);
 	G = zeros(size(M));

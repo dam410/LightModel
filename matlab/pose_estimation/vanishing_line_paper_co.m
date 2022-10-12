@@ -17,20 +17,20 @@ function [N] = vanishing_line_paper_co(Q)
 	% If colocalised a = -1
 	a = (1/2)*(2*trq^3-9*trq*triq+27)/((trq^2-3*triq).^(3/2));
 	%a = (1/2)*(trq^3-9*trq*triq*+27)/((trq^2-3*triq).^(3/2))
-	if (1-norm(a))<1e-7
+	%if (1-norm(a))<1e-7
 		%a = -1 ou 1
 		l12 = 1/2*sqrt(trq^2-3*triq);
 		N = sqrt(l12)*V1/norm(V1);
 		N = N/norm(N);
-	else
-		alpha = 1/3*acos(a);
-		l12 = sqrt(trq^2-3*triq)*(cos(alpha)-sqrt(3)/3*sin(alpha));
-		l23 = 2/3*sqrt(3*trq^2-9*triq)*sin(alpha);
-		N1 = sqrt(l12)*V1/norm(V1)+sqrt(l23)*V3/norm(V3);
-		N1 = N1/norm(N1);
-		N2 = sqrt(l12)*V1/norm(V1)-sqrt(l23)*V3/norm(V3);
-		N2 = N2/norm(N2);
-		N = [N1,N2];
-	end
+	%%else
+	%	alpha = 1/3*acos(a);
+	%	l12 = sqrt(trq^2-3*triq)*(cos(alpha)-sqrt(3)/3*sin(alpha));
+	%	l23 = 2/3*sqrt(3*trq^2-9*triq)*sin(alpha);
+	%	N1 = sqrt(l12)*V1/norm(V1)+sqrt(l23)*V3/norm(V3);
+	%	N1 = N1/norm(N1);
+	%	N2 = sqrt(l12)*V1/norm(V1)-sqrt(l23)*V3/norm(V3);
+	%	N2 = N2/norm(N2);
+	%	N = [N1,N2];
+	%end
 	
 end

@@ -1,4 +1,5 @@
-function [dssp,psp,ps] = visualize_results_2(data,dssp,psp,ps,options)
+% Display the reconstructed results
+function [dssp,psp,ps,fig] = visualize_results_2(data,dssp,psp,ps,options)
 
 	arguments
 		data struct
@@ -7,9 +8,10 @@ function [dssp,psp,ps] = visualize_results_2(data,dssp,psp,ps,options)
 		ps (1,:) cell
 		options.Name (1,1) string = 'Reconstruction'
 		options.Plane (1,1) double
+		options.OutputObjFilename (1,1) string
+		options.SizeCamera (1,1) double = 0.05
 	end
-		
-		
+
 
 	if isfield(options,'Plane')
 		surf_index = [options.Plane];
@@ -17,12 +19,20 @@ function [dssp,psp,ps] = visualize_results_2(data,dssp,psp,ps,options)
 		surf_index = 1:length(psp);
 	end
 
+	% Open obj file
+	if isfield(options,'OutputObjFilename')
+		fileID = fopen(options.OutputObjFilename,'w');
+		isFileOutput = 1;
+	else
+		isFileOutput = 0;
+	end
+
 	nb_scene_plane_estimated = length(psp);
 	
 	K_im = data.K;
 	NB_PTS = 100;
 
-	figure('Name',strcat('3D Scene View: ',options.Name));
+	fig = figure('Name',strcat('3D Scene View: ',options.Name));
 	hold on;
 
 	% Show the camera
@@ -80,11 +90,16 @@ function [dssp,psp,ps] = visualize_results_2(data,dssp,psp,ps,options)
 				psp{i_p}{i_ambig}(4) = -transpose(psp{i_p}{i_ambig}(1:3))*ray;
 				dssp{i_p}{i_ambig} = distance_source_plane(psp{i_p}{i_ambig}(1:3),ps{1},psp{i_p}{i_ambig}(4));
 			end
+
 			% If homography is given for each plane in data, we use it to
 			% calculate the projection of the source on the plane
 			% and display the line coming from it to the source
 			if isfield(data,'homography')
-				H = data.homography{i_p}{i_ambig};
+				if length(data.homography{i_p})<i_ambig
+					H = data.homography{i_p}{1};
+				else
+					H = data.homography{i_p}{i_ambig};
+				end
 				invH = inv(H);
 				Xc_3D = inv(data.K)*invH*[0;0;1];
 				N = transpose(data.K)*transpose(H)*[0;0;1];
@@ -98,16 +113,29 @@ function [dssp,psp,ps] = visualize_results_2(data,dssp,psp,ps,options)
 				%Xc_end = Xc_3D-0.9*dssp{i_p}{i_ambig}*psp{i_p}{i_ambig}(1:3);
 			end
 			Xc_end = -0.92*dssp{i_p}{i_ambig}*psp{i_p}{i_ambig}(1:3);
-			quiver3(Xc_3D(1),Xc_3D(2),Xc_3D(3),Xc_end(1),Xc_end(2),Xc_end(3),'MarkerMode','manual','Color','r',...
-				'MaxHeadSize',0.2,'Linewidth',2,'MarkerSize',5,'Autoscale','off','AutoScaleFactor',2);
-			%plot3([Xc_3D(1),Xc_end(1)],[Xc_3D(2),Xc_end(2)],[Xc_3D(3),Xc_end(3)],'-g','MarkerIndices',2,'Marker','>','MarkerFaceColor','k');
+			%quiver3(Xc_3D(1),Xc_3D(2),Xc_3D(3),Xc_end(1),Xc_end(2),Xc_end(3),'MarkerMode','manual','Color','r',...
+			%	'MaxHeadSize',0.2,'Linewidth',2,'MarkerSize',5,'Autoscale','off','AutoScaleFactor',2);
+			% Save the new position of the planes but after display, we do not want quiver
+			if norm(dssp{i_p}{i_ambig})>1e-6 && norm(ps{1}) < 1e-6 && isfield(data,'isocontour') && isfield(data.isocontour,'Points')
+				% Endoscopic case, we also update based on GT
+				pt_avg = mean(data.isocontour.Points{i_p}{i_ambig}{1});
+                                ray = inv(data.K)*[pt_avg(2);pt_avg(1);1];
+                                ray = ray/norm(ray);
+                                psp{i_p}{i_ambig}(4) = -transpose(psp{i_p}{i_ambig}(1:3))*ray;
+                                dssp{i_p}{i_ambig} = distance_source_plane(psp{i_p}{i_ambig}(1:3),ps{1},psp{i_p}{i_ambig}(4));
+			end
 
 			% If groundtruth has not been displayed, the points are displayed with the estimated plane
 			if isfield(data,'isocontour')
-				if ~iscell(data.isocontour.Points{i_p}{i_ambig})
+				if length(data.isocontour.Points{i_p}) < i_ambig
+					i_loc_ambig = 1;
+				else
+					i_loc_ambig = i_ambig;
+				end
+				if ~iscell(data.isocontour.Points{i_p}{i_loc_ambig})
 					points_iso_cell = data.isocontour.Points{i_p};
 				else
-					points_iso_cell = data.isocontour.Points{i_p}{i_ambig};
+					points_iso_cell = data.isocontour.Points{i_p}{i_loc_ambig};
 				end
 				for i_iso=1:length(points_iso_cell)
 					nb_pts_total = length(points_iso_cell{i_iso});
@@ -128,11 +156,7 @@ function [dssp,psp,ps] = visualize_results_2(data,dssp,psp,ps,options)
 			end
 		end
 	end
-	if max_obs_dis > 0
-		cam = plotCamera('AbsolutePose',pose,'Opacity',0.4,'Color','b','Size',max_obs_dis/20);
-	else
-		cam = plotCamera('AbsolutePose',pose,'Opacity',0.4,'Color','b','Size',0.05);
-	end
+	cam = plotCamera('AbsolutePose',pose,'Opacity',0.4,'Color','b','Size',max(options.SizeCamera,max_obs_dis/20));
 
 	% Show the source
 	if isfield(data,'groundtruth')
